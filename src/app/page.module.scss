@@ -1,0 +1,377 @@
+// src/app/page.module.scss
+@use '../styles/variables' as *;
+@use '../styles/mixins' as *;
+
+// ─────────────────────────────────────────
+// Hero
+// ─────────────────────────────────────────
+.hero {
+  min-height: 100svh;
+  background-color: var(--color-primary);
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse 60% 50% at 70% 50%, rgba(201, 168, 76, 0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  // Dekorativní nit
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 25%;
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      rgba(201, 168, 76, 0.3) 20%,
+      rgba(201, 168, 76, 0.3) 80%,
+      transparent
+    );
+  }
+}
+
+.heroInner {
+  @include container;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-12);
+  padding-block: var(--space-24);
+
+  @include lg {
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+  }
+}
+
+.heroContent {
+  color: var(--color-white);
+}
+
+.heroBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-accent);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-6);
+
+  &::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 1px;
+    background: var(--color-accent);
+  }
+}
+
+.heroTitle {
+  @include heading-display;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  color: var(--color-white);
+  margin-bottom: var(--space-6);
+  line-height: 1.1;
+
+  em {
+    font-style: italic;
+    color: var(--color-accent);
+  }
+}
+
+.heroSubtitle {
+  font-size: var(--text-lg);
+  color: rgba(255, 255, 255, 0.65);
+  max-width: 480px;
+  line-height: 1.7;
+  margin-bottom: var(--space-10);
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.heroStats {
+  display: flex;
+  gap: var(--space-8);
+  margin-top: var(--space-12);
+  padding-top: var(--space-8);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.heroStat {
+  strong {
+    display: block;
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    color: var(--color-accent);
+    font-weight: 700;
+  }
+
+  span {
+    font-size: var(--text-sm);
+    color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+.heroVisual {
+  display: none;
+  position: relative;
+
+  @include lg {
+    display: block;
+  }
+}
+
+.heroCard {
+  @include card;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  padding: var(--space-8);
+  border-radius: var(--radius-lg);
+}
+
+.heroCardTitle {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  color: var(--color-white);
+  margin-bottom: var(--space-6);
+}
+
+.heroCardSteps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.heroCardStep {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.heroCardStepNum {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  background: rgba(201, 168, 76, 0.15);
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  @include flex-center;
+}
+
+.heroCardStepText {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  padding-top: 4px;
+
+  strong {
+    display: block;
+    color: var(--color-white);
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+}
+
+// ─────────────────────────────────────────
+// Services
+// ─────────────────────────────────────────
+.services {
+  padding-block: var(--space-24);
+  background: var(--color-surface);
+}
+
+.servicesInner {
+  @include container;
+}
+
+.sectionHeader {
+  text-align: center;
+  margin-bottom: var(--space-16);
+}
+
+.sectionLabel {
+  display: inline-block;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-accent);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-3);
+}
+
+.sectionTitle {
+  @include heading-display;
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  color: var(--color-primary);
+  margin-bottom: var(--space-4);
+}
+
+.sectionSubtitle {
+  color: var(--color-text-muted);
+  font-size: var(--text-lg);
+  max-width: 560px;
+  margin-inline: auto;
+}
+
+.servicesGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+
+  @include md {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.serviceCard {
+  @include card;
+  padding: var(--space-8);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+.serviceIcon {
+  font-size: 2rem;
+  margin-bottom: var(--space-6);
+}
+
+.serviceTitle {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  color: var(--color-primary);
+  margin-bottom: var(--space-3);
+}
+
+.serviceDesc {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+}
+
+.servicePrice {
+  margin-top: var(--space-6);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-surface-dark);
+  font-size: var(--text-sm);
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+// ─────────────────────────────────────────
+// How it works
+// ─────────────────────────────────────────
+.howItWorks {
+  padding-block: var(--space-24);
+  background: var(--color-primary);
+  color: var(--color-white);
+}
+
+.howItWorksInner {
+  @include container;
+}
+
+.howItWorksGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-8);
+  margin-top: var(--space-16);
+
+  @include md {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.step {
+  position: relative;
+  text-align: center;
+
+  &:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: calc(50% + 32px);
+    width: calc(100% - 64px);
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    display: none;
+
+    @include md {
+      display: block;
+    }
+  }
+}
+
+.stepNum {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: rgba(201, 168, 76, 0.15);
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+  font-weight: 700;
+  @include flex-center;
+  margin-inline: auto;
+  margin-bottom: var(--space-4);
+}
+
+.stepTitle {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-2);
+}
+
+.stepDesc {
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.6;
+}
+
+// ─────────────────────────────────────────
+// CTA
+// ─────────────────────────────────────────
+.cta {
+  padding-block: var(--space-24);
+  background: var(--color-surface);
+}
+
+.ctaInner {
+  @include container;
+  text-align: center;
+}
+
+.ctaTitle {
+  @include heading-display;
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  color: var(--color-primary);
+  margin-bottom: var(--space-4);
+}
+
+.ctaSubtitle {
+  color: var(--color-text-muted);
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-8);
+}

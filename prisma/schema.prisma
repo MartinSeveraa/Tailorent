@@ -1,0 +1,95 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────
+
+enum Role {
+  CUSTOMER
+  TAILOR
+  ADMIN
+}
+
+enum ServiceType {
+  ALTERATION      // Úprava oblečení
+  CUSTOM_SEWING   // Šití na míru
+  EXPRESS         // Expresní služby
+}
+
+enum OrderStatus {
+  PENDING         // Čeká na přiřazení krejčího
+  CONFIRMED       // Krejčí potvrzen
+  IN_PROGRESS     // Probíhá
+  COMPLETED       // Dokončeno
+  CANCELLED       // Zrušeno
+}
+
+// ─────────────────────────────────────────
+// Models
+// ─────────────────────────────────────────
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  name         String
+  passwordHash String
+  role         Role          @default(CUSTOMER)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  // Relations
+  orders       Order[]       @relation("CustomerOrders")
+  tailorProfile TailorProfile?
+
+  @@map("users")
+}
+
+model TailorProfile {
+  id              String        @id @default(uuid())
+  userId          String        @unique
+  bio             String?
+  locality        String        // Město / oblast
+  specializations ServiceType[]
+  isAvailable     Boolean       @default(true)
+  rating          Float         @default(0.0)
+  reviewCount     Int           @default(0)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders  Order[]
+
+  @@map("tailor_profiles")
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  customerId  String
+  tailorId    String?     // Nullable — přiřazeno matchingem
+  serviceType ServiceType
+  description String?
+  address     String
+  city        String
+  scheduledAt DateTime
+  status      OrderStatus @default(PENDING)
+  price       Decimal?    @db.Decimal(10, 2)
+  notes       String?     // Interní poznámky krejčího / admina
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  customer User          @relation("CustomerOrders", fields: [customerId], references: [id])
+  tailor   TailorProfile? @relation(fields: [tailorId], references: [id])
+
+  @@map("orders")
+}

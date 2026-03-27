@@ -1,0 +1,96 @@
+// src/components/ui/Button/Button.module.scss
+@use '../../../styles/mixins' as *;
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-family: var(--font-body);
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+  white-space: nowrap;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
+
+// ── Variants ──
+.primary {
+  background: var(--color-accent);
+  color: var(--color-primary);
+
+  &:hover {
+    background: var(--color-accent-light);
+    box-shadow: 0 4px 16px rgba(201, 168, 76, 0.3);
+  }
+}
+
+.secondary {
+  background: var(--color-primary);
+  color: var(--color-white);
+
+  &:hover {
+    background: var(--color-primary-light);
+  }
+}
+
+.ghost {
+  background: transparent;
+  color: var(--color-white);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+}
+
+.outline {
+  background: transparent;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+
+  &:hover {
+    background: var(--color-primary);
+    color: var(--color-white);
+  }
+}
+
+// ── Sizes ──
+.sm {
+  height: 36px;
+  padding-inline: var(--space-4);
+  font-size: var(--text-sm);
+}
+
+.md {
+  height: 44px;
+  padding-inline: var(--space-6);
+  font-size: var(--text-base);
+}
+
+.lg {
+  height: 52px;
+  padding-inline: var(--space-8);
+  font-size: var(--text-lg);
+}

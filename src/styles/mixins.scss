@@ -1,0 +1,75 @@
+// src/styles/mixins.scss
+@use 'variables' as *;
+
+// ─────────────────────────────────────────
+// Responzivita
+// ─────────────────────────────────────────
+@mixin sm {
+  @media (min-width: #{$bp-sm}) { @content; }
+}
+@mixin md {
+  @media (min-width: #{$bp-md}) { @content; }
+}
+@mixin lg {
+  @media (min-width: #{$bp-lg}) { @content; }
+}
+@mixin xl {
+  @media (min-width: #{$bp-xl}) { @content; }
+}
+
+// ─────────────────────────────────────────
+// Layout
+// ─────────────────────────────────────────
+@mixin container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--space-6);
+
+  @include lg {
+    padding-inline: var(--space-8);
+  }
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// ─────────────────────────────────────────
+// Typografie
+// ─────────────────────────────────────────
+@mixin heading-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+@mixin text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// ─────────────────────────────────────────
+// UI
+// ─────────────────────────────────────────
+@mixin focus-ring {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@mixin card {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-surface-dark);
+}
