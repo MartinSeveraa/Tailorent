@@ -1,5 +1,9 @@
 // src/components/layout/Header/Header.module.scss
 @use '../../../styles/mixins' as *;
+@use '../../../styles/variables' as *;
+
+$gold: #c9a84c;
+$gold-lt: #e0c278;
 
 .header {
   position: fixed;
@@ -8,7 +12,12 @@
   right: 0;
   z-index: 100;
   height: var(--header-height);
-  background: rgba(26, 26, 46, 0.85);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  animation: 0,5s smooth;
+}
+
+.headerScrolled {
+  background: rgba(17, 17, 17, 0.88);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
@@ -20,24 +29,20 @@
 }
 
 .logo {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
   font-family: var(--font-display);
-  font-size: var(--text-xl);
+  font-size: 1.4rem;
   font-weight: 700;
-  color: var(--color-white);
+  letter-spacing: 0.02em;
+  color: #fff;
   text-decoration: none;
 
-  span {
-    color: var(--color-accent);
-  }
+  span { color: $gold; }
 }
 
 .nav {
   display: none;
   align-items: center;
-  gap: var(--space-8);
+  gap: 40px;
 
   @include md {
     display: flex;
@@ -45,18 +50,45 @@
 }
 
 .navLink {
-  font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.65);
-  transition: color var(--transition-fast);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
   text-decoration: none;
+  transition: color 200ms;
 
   &:hover {
-    color: var(--color-white);
+    color: #fff;
   }
 }
 
 .actions {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: 16px;
+}
+
+.login {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: none;
+  transition: color 200ms;
+
+  &:hover { color: #fff; }
+}
+
+.cta {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: $gold;
+  color: #111;
+  font-weight: 700;
+  padding: 9px 18px;
+  text-decoration: none;
+  transition: background 200ms;
+
+  &:hover { background: $gold-lt; }
 }

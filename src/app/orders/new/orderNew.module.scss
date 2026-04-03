@@ -1,0 +1,446 @@
+// src/app/orders/new/new.module.scss
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as *;
+
+$dark:    #111111;
+$dark-2:  #161616;
+$dark-3:  #1f1f1f;
+$dark-4:  #282828;
+$gold:    #c9a84c;
+$gold-lt: #e0c278;
+
+// ─────────────────────────────────────────
+// LAYOUT
+// ─────────────────────────────────────────
+.page {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  min-height: 100svh;
+  background: $dark-2;
+
+  @media (max-width: #{$bp-lg}) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ─────────────────────────────────────────
+// SIDEBAR
+// ─────────────────────────────────────────
+.sidebar {
+  background: $dark;
+  border-right: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  flex-direction: column;
+  padding: 40px 32px;
+  gap: 48px;
+  position: sticky;
+  top: 0;
+  height: 100svh;
+
+  @media (max-width: #{$bp-lg}) {
+    display: none;
+  }
+}
+
+.sidebarLogo {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+
+  span { color: $gold; }
+}
+
+.sidebarContent {
+  flex: 1;
+}
+
+.sidebarLabel {
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: $gold;
+  margin-bottom: 14px;
+
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 1px;
+    background: $gold;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+}
+
+.sidebarTitle {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1.15;
+  color: #fff;
+
+  em {
+    font-style: italic;
+    color: $gold;
+  }
+}
+
+// ── STEPS ──
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+  position: relative;
+
+  &:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 42px;
+    width: 1px;
+    height: calc(100% - 14px);
+    background: rgba(255,255,255,0.07);
+  }
+}
+
+.stepNum {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.3);
+  font-size: 0.8rem;
+  font-weight: 600;
+  @include flex-center;
+  flex-shrink: 0;
+  transition: all 250ms;
+  z-index: 1;
+  background: $dark;
+}
+
+.stepLabel {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.3);
+  transition: color 250ms;
+}
+
+.stepActive {
+  .stepNum {
+    border-color: $gold;
+    color: $gold;
+    background: rgba(201,168,76,0.08);
+  }
+  .stepLabel {
+    color: #fff;
+    font-weight: 500;
+  }
+}
+
+.stepDone {
+  .stepNum {
+    border-color: rgba(201,168,76,0.4);
+    color: $gold;
+    background: rgba(201,168,76,0.06);
+  }
+  .stepLabel {
+    color: rgba(255,255,255,0.45);
+  }
+}
+
+// ─────────────────────────────────────────
+// MAIN
+// ─────────────────────────────────────────
+.main {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 60px 48px;
+
+  @media (max-width: #{$bp-md}) {
+    padding: 32px 20px;
+  }
+}
+
+.formWrap {
+  width: 100%;
+  max-width: 620px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+// ─────────────────────────────────────────
+// STEP CONTENT
+// ─────────────────────────────────────────
+.stepContent {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.stepTitle {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.15;
+}
+
+.stepSub {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.45);
+  margin-top: -16px;
+}
+
+// ─────────────────────────────────────────
+// SERVICE CARDS
+// ─────────────────────────────────────────
+.serviceGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+
+  @media (max-width: #{$bp-md}) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.serviceCard {
+  background: $dark-3;
+  border: 1px solid transparent;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 200ms, border-color 200ms;
+
+  &:hover {
+    background: $dark-4;
+    border-color: rgba(255,255,255,0.08);
+  }
+}
+
+.serviceCardActive {
+  background: rgba(201,168,76,0.06) !important;
+  border-color: $gold !important;
+}
+
+.serviceIcon {
+  font-size: 1.5rem;
+  color: $gold;
+  line-height: 1;
+}
+
+.serviceTitle {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.serviceDesc {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.45);
+  line-height: 1.5;
+  flex: 1;
+}
+
+.servicePrice {
+  font-size: 0.75rem;
+  color: $gold;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin-top: 4px;
+}
+
+// ─────────────────────────────────────────
+// FIELDS
+// ─────────────────────────────────────────
+.fieldGroup {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 12px;
+
+  @media (max-width: #{$bp-sm}) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+}
+
+.input {
+  background: $dark-3;
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #fff;
+  font-size: 0.95rem;
+  padding: 13px 16px;
+  width: 100%;
+  outline: none;
+  transition: border-color 200ms, background 200ms;
+  font-family: var(--font-body);
+
+  // datetime-local picker icon
+  color-scheme: dark;
+
+  &::placeholder { color: rgba(255,255,255,0.2); }
+
+  &:focus {
+    border-color: $gold;
+    background: rgba(201,168,76,0.03);
+  }
+}
+
+.textarea {
+  background: $dark-3;
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #fff;
+  font-size: 0.9rem;
+  padding: 13px 16px;
+  width: 100%;
+  outline: none;
+  resize: vertical;
+  transition: border-color 200ms;
+  font-family: var(--font-body);
+  line-height: 1.6;
+
+  &::placeholder { color: rgba(255,255,255,0.2); }
+
+  &:focus { border-color: $gold; }
+}
+
+// ── INFO BOX ──
+.infoBox {
+  display: flex;
+  gap: 12px;
+  background: rgba(201,168,76,0.05);
+  border: 1px solid rgba(201,168,76,0.15);
+  padding: 14px 16px;
+
+  p {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.45);
+    line-height: 1.6;
+  }
+}
+
+.infoIcon {
+  color: $gold;
+  font-size: 1rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+// ─────────────────────────────────────────
+// SUMMARY
+// ─────────────────────────────────────────
+.summary {
+  background: $dark-3;
+  border: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  flex-direction: column;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+
+  &:last-child { border-bottom: none; }
+}
+
+.summaryKey {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.summaryVal {
+  font-size: 0.9rem;
+  color: #fff;
+  text-align: right;
+}
+
+.summaryPrice {
+  color: $gold;
+  font-weight: 600;
+}
+
+.error {
+  font-size: 0.83rem;
+  color: #e05252;
+  background: rgba(224,82,82,0.08);
+  border: 1px solid rgba(224,82,82,0.2);
+  padding: 10px 14px;
+}
+
+// ─────────────────────────────────────────
+// NAV BAR
+// ─────────────────────────────────────────
+.navBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.backBtn {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.4);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 8px 0;
+  transition: color 200ms;
+
+  &:hover { color: rgba(255,255,255,0.8); }
+}
+
+.nextBtn {
+  background: $gold;
+  color: $dark;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 14px 28px;
+  border: none;
+  cursor: pointer;
+  transition: background 200ms;
+
+  &:hover:not(:disabled) { background: $gold-lt; }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+}

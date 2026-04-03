@@ -8,7 +8,7 @@ export function Footer() {
       <div className={styles.inner}>
         <div className={styles.brand}>
           <span className={styles.logo}>
-            Krejčí<em>App</em>
+            Tailor<em>ent</em>
           </span>
           <p className={styles.tagline}>
             Prémiové krejčovské služby přímo k vám domů.
@@ -17,7 +17,7 @@ export function Footer() {
 
         <div className={styles.bottom}>
           <p className={styles.copy}>
-            © {new Date().getFullYear()} KrejčíApp. Všechna práva vyhrazena.
+            © {new Date().getFullYear()} Tailorent s.r.o. Všechna práva vyhrazena.
           </p>
           <div className={styles.links}>
             <Link href="/gdpr">Ochrana osobních údajů</Link>
