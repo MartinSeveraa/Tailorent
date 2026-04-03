@@ -6,6 +6,9 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { formatDate, formatPrice } from "@/lib/utils";
 import { ORDER_STATUS_LABELS, SERVICE_TYPE_LABELS } from "@/types";
+import { TailorRequests } from "./TailorRequests";
+import { LogoutButton } from "./LogoutButton";
+import { AdminOrdersManager } from "./AdminOrdersManager";
 import styles from "./dashboard.module.scss";
 
 export const metadata = { title: "Dashboard" };
@@ -16,6 +19,8 @@ export default async function DashboardPage() {
 
   const user = session.user as any;
   const isCustomer = user.role === "CUSTOMER";
+  const isTailor = user.role === "TAILOR";
+  const isAdmin = user.role === "ADMIN";
 
   // ── Data fetch ──────────────────────────────────────────────
   const orders = isCustomer
@@ -24,13 +29,30 @@ export default async function DashboardPage() {
         include: { tailor: { include: { user: true } } },
         orderBy: { createdAt: "desc" },
       })
-    : await prisma.order.findMany({
+    : isTailor
+    ? await prisma.order.findMany({
         where: {
           tailor: { userId: user.id },
         },
         include: { customer: true },
         orderBy: { scheduledAt: "asc" },
+      })
+    : await prisma.order.findMany({
+        include: {
+          customer: true,
+          tailor: { include: { user: true } },
+        },
+        orderBy: { createdAt: "desc" },
       });
+
+  const tailors = isAdmin
+    ? await prisma.tailorProfile.findMany({
+        include: {
+          user: { select: { name: true, email: true } },
+        },
+        orderBy: { user: { name: "asc" } },
+      })
+    : [];
 
   const statusCount = {
     active: orders.filter((o) =>
@@ -53,6 +75,12 @@ export default async function DashboardPage() {
             <span className={styles.sidebarIcon}>◈</span>
             Dashboard
           </Link>
+          {isAdmin && (
+            <Link href="/dashboard/services" className={styles.sidebarLink}>
+              <span className={styles.sidebarIcon}>⚙</span>
+              Služby
+            </Link>
+          )}
           {isCustomer && (
             <Link href="/orders/new" className={styles.sidebarLink}>
               <span className={styles.sidebarIcon}>＋</span>
@@ -70,6 +98,9 @@ export default async function DashboardPage() {
             <span>{isCustomer ? "Zákazník" : "Krejčí"}</span>
           </div>
         </div>
+        <div className={styles.sidebarLogout}>
+          <LogoutButton />
+        </div>
       </aside>
 
       {/* ── Main ── */}
@@ -78,7 +109,11 @@ export default async function DashboardPage() {
         <div className={styles.topBar}>
           <div>
             <p className={styles.topBarLabel}>
-              {isCustomer ? "Zákaznický přehled" : "Přehled zakázek"}
+              {isCustomer
+                ? "Zákaznický přehled"
+                : isTailor
+                ? "Přehled zakázek"
+                : "Admin přehled"}
             </p>
             <h1 className={styles.topBarTitle}>
               Dobrý den, {user.name?.split(" ")[0]}
@@ -110,7 +145,7 @@ export default async function DashboardPage() {
         {/* Orders */}
         <div className={styles.section}>
           <h2 className={styles.sectionTitle}>
-            {isCustomer ? "Moje objednávky" : "Přiřazené zakázky"}
+            {isCustomer ? "Moje objednávky" : isTailor ? "Přiřazené zakázky" : "Všechny objednávky"}
           </h2>
 
           {orders.length === 0 ? (
@@ -126,7 +161,7 @@ export default async function DashboardPage() {
                 </Link>
               )}
             </div>
-          ) : (
+          ) : isCustomer ? (
             <div className={styles.orderList}>
               {orders.map((order) => (
                 <div key={order.id} className={styles.orderCard}>
@@ -140,9 +175,9 @@ export default async function DashboardPage() {
                     <p className={styles.orderMeta}>
                       {order.address}, {order.city}
                     </p>
-                    {isCustomer && (order as any).tailor && (
+                    {isCustomer && (
                       <p className={styles.orderMeta}>
-                        Krejčí: {(order as any).tailor.user.name}
+                        Krejčí: {(order as any).tailor?.user?.name ?? "Čeká na přiřazení"}
                       </p>
                     )}
                     {!isCustomer && (order as any).customer && (
@@ -164,6 +199,60 @@ export default async function DashboardPage() {
                 </div>
               ))}
             </div>
+          ) : isTailor ? (
+            <TailorRequests
+              orders={orders.map((order) => ({
+                id: order.id,
+                status: order.status as any,
+                serviceType: order.serviceType as any,
+                description: order.description,
+                address: order.address,
+                city: order.city,
+                scheduledAt: order.scheduledAt,
+                notes: order.notes,
+                customer: (order as any).customer
+                  ? {
+                      name: (order as any).customer.name,
+                      email: (order as any).customer.email,
+                    }
+                  : null,
+              }))}
+            />
+          ) : (
+            <AdminOrdersManager
+              orders={orders.map((order) => ({
+                id: order.id,
+                status: order.status as any,
+                serviceType: order.serviceType as any,
+                description: order.description,
+                address: order.address,
+                city: order.city,
+                scheduledAt: order.scheduledAt,
+                notes: order.notes,
+                price: order.price ? Number(order.price) : null,
+                tailorId: order.tailorId,
+                customer: (order as any).customer
+                  ? {
+                      name: (order as any).customer.name,
+                      email: (order as any).customer.email,
+                    }
+                  : null,
+                tailor: (order as any).tailor
+                  ? {
+                      user: {
+                        name: (order as any).tailor.user?.name,
+                        email: (order as any).tailor.user?.email,
+                      },
+                    }
+                  : null,
+              }))}
+              tailors={tailors.map((tailor) => ({
+                id: tailor.id,
+                name: tailor.user.name,
+                email: tailor.user.email,
+                locality: tailor.locality,
+              }))}
+            />
           )}
         </div>
       </main>

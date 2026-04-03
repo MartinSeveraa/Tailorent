@@ -1,6 +1,6 @@
 "use client";
 // src/app/orders/new/page.tsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "./orderNew.module.scss";
@@ -8,34 +8,63 @@ import styles from "./orderNew.module.scss";
 type Step = 1 | 2 | 3;
 
 type FormData = {
+  serviceId: string;
   serviceType: string;
   description: string;
   address: string;
   city: string;
   scheduledAt: string;
+  tailorId: string;
 };
 
-const SERVICES = [
+type Tailor = {
+  id: string;
+  name: string;
+  email: string;
+  tailorProfile?: {
+    locality: string;
+    rating: number;
+    reviewCount: number;
+  } | null;
+};
+
+type CatalogService = {
+  id: string;
+  serviceType: "ALTERATION" | "CUSTOM_SEWING" | "EXPRESS";
+  title: string;
+  description: string;
+  priceFrom: number;
+  imageUrl: string;
+  isActive: boolean;
+};
+
+const FALLBACK_SERVICES: CatalogService[] = [
   {
-    id: "ALTERATION",
-    icon: "✂",
+    id: "service_alteration",
+    serviceType: "ALTERATION",
     title: "Úpravy oblečení",
-    desc: "Zkrácení, zúžení, přešití zipů a opravy",
-    price: "od 200 Kč",
+    description: "Zkrácení, zúžení, přešití zipů a opravy",
+    priceFrom: 200,
+    imageUrl: "",
+    isActive: true,
   },
   {
-    id: "CUSTOM_SEWING",
-    icon: "◈",
+    id: "service_custom_sewing",
+    serviceType: "CUSTOM_SEWING",
     title: "Šití na míru",
-    desc: "Obleky, šaty, košile — přesně podle vašich měr",
-    price: "od 1 500 Kč",
+    description: "Obleky, šaty, košile — přesně podle vašich měr",
+    priceFrom: 1500,
+    imageUrl: "",
+    isActive: true,
   },
   {
-    id: "EXPRESS",
-    icon: "⚡",
+    id: "service_express",
+    serviceType: "EXPRESS",
     title: "Expresní služba",
-    desc: "Výjezd v den objednávky, oprava do 24 hodin",
-    price: "od 500 Kč",
+    description: "Výjezd v den objednávky, oprava do 24 hodin",
+    priceFrom: 500,
+    imageUrl: "",
+    isActive: true,
   },
 ];
 
@@ -46,16 +75,23 @@ export default function NewOrderPage() {
   const [step, setStep] = useState<Step>(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [tailors, setTailors] = useState<Tailor[]>([]);
+  const [services, setServices] = useState<CatalogService[]>(FALLBACK_SERVICES);
+  const [tailorsLoading, setTailorsLoading] = useState(false);
+  const [tailorsError, setTailorsError] = useState("");
 
   const [form, setForm] = useState<FormData>({
+    serviceId: "",
     serviceType: "",
     description: "",
     address: "",
     city: "",
     scheduledAt: "",
+    tailorId: "",
   });
 
-  const selectedService = SERVICES.find((s) => s.id === form.serviceType);
+  const selectedService = services.find((s) => s.id === form.serviceId);
+  const selectedTailor = tailors.find((t) => t.id === form.tailorId);
 
   // ── Helpers ──────────────────────────────────────────────────
   const setField = (field: keyof FormData, value: string) => {
@@ -63,7 +99,7 @@ export default function NewOrderPage() {
   };
 
   const canGoNext = (): boolean => {
-    if (step === 1) return !!form.serviceType;
+    if (step === 1) return !!form.serviceId;
     if (step === 2) return !!form.address && !!form.city && !!form.scheduledAt;
     return true;
   };
@@ -76,6 +112,51 @@ export default function NewOrderPage() {
     if (step > 1) setStep((s) => (s - 1) as Step);
   };
 
+  // Načtení seznamu krejčích (users s rolí TAILOR)
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      setTailorsLoading(true);
+      setTailorsError("");
+      try {
+        const res = await fetch("/api/tailors");
+        const data = await res.json();
+        if (!res.ok) {
+          if (!cancelled) setTailorsError(data.error ?? "Nepodařilo se načíst seznam krejčích.");
+          return;
+        }
+        if (!cancelled) setTailors(data.data ?? []);
+      } catch {
+        if (!cancelled) setTailorsError("Chyba při načítání seznamu krejčích.");
+      } finally {
+        if (!cancelled) setTailorsLoading(false);
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadServices = async () => {
+      try {
+        const res = await fetch("/api/services");
+        const data = await res.json();
+        if (!res.ok) return;
+        const active = (data.data ?? []).filter((s: CatalogService) => s.isActive);
+        if (!cancelled && active.length > 0) setServices(active);
+      } catch {
+        // fallback services
+      }
+    };
+    loadServices();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const handleSubmit = async () => {
     setError("");
     setLoading(true);
@@ -86,6 +167,11 @@ export default function NewOrderPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          serviceType: selectedService?.serviceType ?? "CUSTOM_SEWING",
+          description: selectedService
+            ? `${selectedService.title}${form.description ? ` — ${form.description}` : ""}`
+            : form.description,
+          tailorId: form.tailorId || undefined,
           scheduledAt: new Date(form.scheduledAt).toISOString(),
         }),
       });
@@ -152,17 +238,19 @@ export default function NewOrderPage() {
               <p className={styles.stepSub}>Jakou krejčovskou službu potřebujete?</p>
 
               <div className={styles.serviceGrid}>
-                {SERVICES.map((s) => (
+                {services.map((s) => (
                   <button
                     key={s.id}
                     type="button"
-                    onClick={() => setField("serviceType", s.id)}
-                    className={`${styles.serviceCard} ${form.serviceType === s.id ? styles.serviceCardActive : ""}`}
+                    onClick={() => {
+                      setField("serviceId", s.id);
+                      setField("serviceType", s.serviceType);
+                    }}
+                    className={`${styles.serviceCard} ${form.serviceId === s.id ? styles.serviceCardActive : ""}`}
                   >
-                    <span className={styles.serviceIcon}>{s.icon}</span>
                     <h3 className={styles.serviceTitle}>{s.title}</h3>
-                    <p className={styles.serviceDesc}>{s.desc}</p>
-                    <span className={styles.servicePrice}>{s.price}</span>
+                    <p className={styles.serviceDesc}>{s.description}</p>
+                    <span className={styles.servicePrice}>od {s.priceFrom} Kč</span>
                   </button>
                 ))}
               </div>
@@ -236,10 +324,42 @@ export default function NewOrderPage() {
                 />
               </div>
 
+              <div className={styles.field}>
+                <label className={styles.label} htmlFor="tailor">
+                  Konkrétní krejčí (volitelné)
+                </label>
+                <select
+                  id="tailor"
+                  className={styles.input}
+                  value={form.tailorId}
+                  onChange={(e) => setField("tailorId", e.target.value)}
+                  disabled={tailorsLoading || !!tailorsError || tailors.length === 0}
+                >
+                  <option value="">Nechat vybrat podle lokality</option>
+                  {tailors.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name}
+                      {t.tailorProfile?.locality ? ` — ${t.tailorProfile.locality}` : ""}
+                      {typeof t.tailorProfile?.rating === "number" &&
+                      t.tailorProfile.reviewCount > 0
+                        ? ` (${t.tailorProfile.rating.toFixed(1)}★, ${t.tailorProfile.reviewCount} hodnocení)`
+                        : ""}
+                    </option>
+                  ))}
+                </select>
+                {tailorsLoading && (
+                  <span className={styles.helperText}>Načítám seznam krejčích…</span>
+                )}
+                {tailorsError && (
+                  <span className={styles.helperText}>{tailorsError}</span>
+                )}
+              </div>
+
               <div className={styles.infoBox}>
                 <span className={styles.infoIcon}>ℹ</span>
                 <p>
                   Po potvrzení vám přiřadíme nejbližšího dostupného krejčího ve vaší lokalitě.
+                  Pokud zvolíte konkrétního krejčího, budeme se prioritně snažit přiřadit jeho.
                   Potvrzení obdržíte e-mailem.
                 </p>
               </div>
@@ -256,7 +376,7 @@ export default function NewOrderPage() {
                 <div className={styles.summaryRow}>
                   <span className={styles.summaryKey}>Služba</span>
                   <span className={styles.summaryVal}>
-                    {selectedService?.icon} {selectedService?.title}
+                    {selectedService?.title}
                   </span>
                 </div>
 
@@ -271,6 +391,19 @@ export default function NewOrderPage() {
                   <span className={styles.summaryKey}>Adresa</span>
                   <span className={styles.summaryVal}>
                     {form.address}, {form.city}
+                  </span>
+                </div>
+
+                <div className={styles.summaryRow}>
+                  <span className={styles.summaryKey}>Krejčí</span>
+                  <span className={styles.summaryVal}>
+                    {selectedTailor
+                      ? `${selectedTailor.name}${
+                          selectedTailor.tailorProfile?.locality
+                            ? ` — ${selectedTailor.tailorProfile.locality}`
+                            : ""
+                        }`
+                      : "Nechat vybrat automaticky"}
                   </span>
                 </div>
 
@@ -290,7 +423,7 @@ export default function NewOrderPage() {
                 <div className={styles.summaryRow}>
                   <span className={styles.summaryKey}>Orientační cena</span>
                   <span className={`${styles.summaryVal} ${styles.summaryPrice}`}>
-                    {selectedService?.price}
+                    {selectedService ? `od ${selectedService.priceFrom} Kč` : "—"}
                   </span>
                 </div>
               </div>

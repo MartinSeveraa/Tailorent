@@ -67,14 +67,39 @@ const SERVICES = [
   },
 ];
 
+type HomeService = {
+  id: string;
+  title: string;
+  description: string;
+  priceFrom: number;
+  imageUrl: string;
+  isActive: boolean;
+};
+
 export default function HomePage() {
   const [current, setCurrent] = useState(0);
+  const [services, setServices] = useState<HomeService[]>([]);
 
   useEffect(() => {
     const t = setInterval(() => {
       setCurrent((c) => (c + 1) % HERO_SLIDES.length);
     }, 5000);
     return () => clearInterval(t);
+  }, []);
+
+  useEffect(() => {
+    const loadServices = async () => {
+      try {
+        const res = await fetch("/api/services");
+        const data = await res.json();
+        if (!res.ok) return;
+        const active = (data.data ?? []).filter((s: HomeService) => s.isActive).slice(0, 3);
+        setServices(active);
+      } catch {
+        // keep fallback constants
+      }
+    };
+    loadServices();
   }, []);
 
   return (
@@ -188,22 +213,33 @@ export default function HomePage() {
           </div>
 
           <div className={styles.servicesGrid}>
-            {SERVICES.map((s, i) => (
+            {(services.length ? services : SERVICES).map((s: any, i) => (
               <div key={s.title} className={styles.serviceCard}>
+                {services.length && s.imageUrl && (
+                  <div className={styles.serviceImage}>
+                    <img src={s.imageUrl} alt={s.title} />
+                  </div>
+                )}
                 <div className={styles.serviceCardTop}>
-                  <span className={styles.serviceIcon}>{s.icon}</span>
+                  <span className={styles.serviceIcon}>{services.length ? "◈" : s.icon}</span>
                   <span className={styles.serviceCardNum}>
                     {String(i + 1).padStart(2, "0")}
                   </span>
                 </div>
                 <h3 className={styles.serviceTitle}>{s.title}</h3>
-                <ul className={styles.serviceList}>
-                  {s.items.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
+                {services.length ? (
+                  <p className={styles.serviceListText}>{s.description}</p>
+                ) : (
+                  <ul className={styles.serviceList}>
+                    {s.items.map((item: string) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                )}
                 <div className={styles.serviceFooter}>
-                  <span className={styles.servicePrice}>{s.price}</span>
+                  <span className={styles.servicePrice}>
+                    {services.length ? `od ${s.priceFrom} Kč` : s.price}
+                  </span>
                   <Link href="/register" className={styles.serviceLink}>
                     Objednat →
                   </Link>

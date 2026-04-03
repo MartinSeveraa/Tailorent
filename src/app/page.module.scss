@@ -485,6 +485,19 @@ $muted:    rgba(255,255,255,0.45);
   }
 }
 
+.serviceImage {
+  margin: -40px -36px 18px;
+  aspect-ratio: 16 / 7;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.8);
+  }
+}
+
 .serviceCardTop {
   display: flex;
   align-items: flex-start;
@@ -535,6 +548,13 @@ $muted:    rgba(255,255,255,0.45);
       font-size: 0.7rem;
     }
   }
+}
+
+.serviceListText {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.7;
+  flex: 1;
 }
 
 .serviceFooter {

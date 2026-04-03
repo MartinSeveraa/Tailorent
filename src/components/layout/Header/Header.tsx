@@ -2,6 +2,7 @@
 // src/components/layout/Header/Header.tsx
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import styles from "./Header.module.scss";
 
 const NAV_LINKS = [
@@ -12,6 +13,7 @@ const NAV_LINKS = [
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
+  const { data: session } = useSession();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
@@ -35,8 +37,18 @@ export function Header() {
         </nav>
 
         <div className={styles.actions}>
-          <Link href="/login" className={styles.login}>Přihlásit</Link>
-          <Link href="/register" className={styles.cta}>Objednat</Link>
+          {session?.user ? (
+            <Link href="/dashboard" className={styles.account} aria-label="Můj účet">
+              <span className={styles.accountIcon}>
+                {session.user.name?.charAt(0).toUpperCase() ?? "U"}
+              </span>
+            </Link>
+          ) : (
+            <Link href="/login" className={styles.login}>Přihlásit</Link>
+          )}
+          <Link href={session?.user ? "/dashboard" : "/register"} className={styles.cta}>
+            Objednat
+          </Link>
         </div>
       </div>
     </header>

@@ -20,6 +20,7 @@ $gold-lt: #e0c278;
 
   @media (max-width: #{$bp-md}) {
     grid-template-columns: 1fr;
+    min-height: calc(100svh - var(--header-height));
   }
 }
 
@@ -33,8 +34,8 @@ $gold-lt: #e0c278;
   flex-direction: column;
   padding: 0;
   position: sticky;
-  top: 0;
-  height: 100svh;
+  top: calc(var(--header-height) + 16px);
+  height: calc(100svh - var(--header-height) - 16px);
 
   @media (max-width: #{$bp-md}) {
     display: none;
@@ -105,6 +106,30 @@ $gold-lt: #e0c278;
   border-top: 1px solid rgba(255,255,255,0.05);
 }
 
+.sidebarLogout {
+  padding: 0 20px 20px;
+}
+
+.logoutBtn {
+  width: 100%;
+  background: transparent;
+  color: rgba(255,255,255,0.55);
+  border: 1px solid rgba(255,255,255,0.16);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: border-color 200ms, color 200ms, background 200ms;
+
+  &:hover {
+    color: #fff;
+    border-color: rgba(255,255,255,0.35);
+    background: rgba(255,255,255,0.04);
+  }
+}
+
 .sidebarAvatar {
   width: 34px;
   height: 34px;
@@ -139,7 +164,7 @@ $gold-lt: #e0c278;
 // MAIN
 // ─────────────────────────────────────────
 .main {
-  padding: 40px 48px;
+  padding: calc(var(--header-height) + 16px) 48px 40px;
   max-width: 1000px;
 
   @media (max-width: #{$bp-md}) {
@@ -313,6 +338,150 @@ $gold-lt: #e0c278;
 .orderMeta {
   font-size: 0.8rem;
   color: rgba(255,255,255,0.4);
+}
+
+.tailorActionWrap {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 320px;
+}
+
+.adminGrid {
+  display: grid;
+  gap: 24px;
+}
+
+.adminDashboardWrap {
+  display: grid;
+  gap: 28px;
+}
+
+.addServiceCard {
+  border: 1px dashed rgba(201,168,76,0.45);
+  background: linear-gradient(180deg, rgba(201,168,76,0.08) 0%, rgba(31,31,31,1) 70%);
+}
+
+.addServiceBadge {
+  display: inline-block;
+  width: fit-content;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: $gold;
+  border: 1px solid rgba(201,168,76,0.45);
+  padding: 4px 9px;
+  background: rgba(201,168,76,0.1);
+}
+
+.adminTabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.adminTab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: $dark-3;
+  color: rgba(255,255,255,0.65);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 8px 12px;
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: border-color 200ms, color 200ms, background 200ms;
+
+  &:hover {
+    color: #fff;
+    border-color: rgba(255,255,255,0.22);
+  }
+}
+
+.adminTabActive {
+  color: $gold;
+  border-color: rgba(201,168,76,0.55);
+  background: rgba(201,168,76,0.08);
+}
+
+.adminTabCount {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.55);
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 2px 6px;
+}
+
+.adminSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.adminFields {
+  margin-top: 10px;
+  display: grid;
+  gap: 8px;
+  max-width: 540px;
+}
+
+.adminActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.label {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+}
+
+.textarea {
+  background: $dark-4;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff;
+  font-size: 0.82rem;
+  padding: 10px 12px;
+  width: 100%;
+  outline: none;
+  resize: vertical;
+  font-family: var(--font-body);
+  line-height: 1.5;
+
+  &::placeholder {
+    color: rgba(255,255,255,0.25);
+  }
+
+  &:focus {
+    border-color: $gold;
+  }
+}
+
+.confirmBtn {
+  align-self: flex-start;
+  background: $gold;
+  color: $dark;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 10px 16px;
+  border: none;
+  cursor: pointer;
+  transition: background 200ms, opacity 200ms;
+
+  &:hover:not(:disabled) {
+    background: $gold-lt;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
 
 .orderDate {

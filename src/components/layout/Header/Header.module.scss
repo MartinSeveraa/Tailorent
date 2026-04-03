@@ -14,12 +14,25 @@ $gold-lt: #e0c278;
   height: var(--header-height);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   animation: 0,5s smooth;
+
+  // Na mobilu chceme stejný background jako po scrollu hned od začátku.
+  @media (max-width: #{$bp-md}) {
+    background: rgba(17, 17, 17, 0.88);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
 }
 
 .headerScrolled {
   background: rgba(17, 17, 17, 0.88);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+
+  // Na mobilu už se pozadí nemá při scrollu měnit.
+  @media (max-width: #{$bp-md}) {
+    background: rgba(17, 17, 17, 0.88);
+    backdrop-filter: blur(16px);
+  }
 }
 
 .inner {
@@ -77,6 +90,30 @@ $gold-lt: #e0c278;
   transition: color 200ms;
 
   &:hover { color: #fff; }
+}
+
+.account {
+  text-decoration: none;
+}
+
+.accountIcon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(201, 168, 76, 0.45);
+  background: rgba(201, 168, 76, 0.14);
+  color: $gold;
+  font-size: 0.78rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 200ms, border-color 200ms;
+
+  &:hover {
+    background: rgba(201, 168, 76, 0.22);
+    border-color: rgba(201, 168, 76, 0.8);
+  }
 }
 
 .cta {

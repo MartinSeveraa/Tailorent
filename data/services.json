@@ -1,0 +1,29 @@
+[
+  {
+    "id": "service_alteration",
+    "serviceType": "ALTERATION",
+    "title": "Úpravy oblečení",
+    "description": "Zkrácení, zúžení, přešití zipů a opravy",
+    "priceFrom": 1000,
+    "imageUrl": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=900&q=80&fit=crop",
+    "isActive": true
+  },
+  {
+    "id": "service_custom_sewing",
+    "serviceType": "CUSTOM_SEWING",
+    "title": "Šití na míru",
+    "description": "Obleky, šaty, košile — přesně podle vašich měr",
+    "priceFrom": 1500,
+    "imageUrl": "https://images.unsplash.com/photo-1612722432474-b971cdcea546?w=900&q=80&fit=crop",
+    "isActive": true
+  },
+  {
+    "id": "service_express",
+    "serviceType": "EXPRESS",
+    "title": "Expresní služba",
+    "description": "Výjezd v den objednávky, oprava do 24 hodin",
+    "priceFrom": 500,
+    "imageUrl": "https://images.unsplash.com/photo-1593032465171-8bd9f0f2a58a?w=900&q=80&fit=crop",
+    "isActive": true
+  }
+]

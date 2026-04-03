@@ -18,9 +18,12 @@ export const createOrderSchema = z.object({
   address: z.string().min(5, "Adresa je povinná"),
   city: z.string().min(2, "Město je povinné"),
   scheduledAt: z.string().datetime({ message: "Neplatný datum a čas" }),
+  tailorId: z.string().uuid().optional(),
 });
 
 export const updateOrderSchema = z.object({
+  serviceType: z.enum(["ALTERATION", "CUSTOM_SEWING", "EXPRESS"]).optional(),
+  description: z.string().optional(),
   status: z
     .enum(["PENDING", "CONFIRMED", "IN_PROGRESS", "COMPLETED", "CANCELLED"])
     .optional(),
