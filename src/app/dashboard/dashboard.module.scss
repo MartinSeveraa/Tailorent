@@ -512,3 +512,80 @@ $gold-lt: #e0c278;
 .status_IN_PROGRESS { background: rgba(168,85,247,0.12);  color: #c084fc; }
 .status_COMPLETED   { background: rgba(34,197,94,0.12);   color: #4ade80; }
 .status_CANCELLED   { background: rgba(239,68,68,0.12);   color: #f87171; }
+
+// ── REVIEW ──
+.reviewWrap {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reviewToggleBtn {
+  align-self: flex-start;
+  background: transparent;
+  border: 1px solid rgba(34,197,94,0.4);
+  color: #4ade80;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: background 200ms, border-color 200ms;
+
+  &:hover {
+    background: rgba(34,197,94,0.08);
+    border-color: rgba(34,197,94,0.7);
+  }
+}
+
+.reviewForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  background: $dark-4;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.reviewLabel {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+}
+
+.starRow {
+  display: flex;
+  gap: 4px;
+}
+
+.star {
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  color: rgba(255,255,255,0.15);
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: color 150ms, transform 150ms;
+
+  &:hover, &:focus { outline: none; }
+}
+
+.starActive {
+  color: $gold;
+  transform: scale(1.1);
+}
+
+.reviewDone {
+  font-size: 0.78rem;
+  color: #4ade80;
+  font-weight: 600;
+}
+
+.reviewError {
+  font-size: 0.75rem;
+  color: #f87171;
+}

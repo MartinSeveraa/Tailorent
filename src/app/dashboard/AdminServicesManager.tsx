@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./dashboard.module.scss";
 
 type ServiceType = "ALTERATION" | "CUSTOM_SEWING" | "EXPRESS";
@@ -14,6 +14,74 @@ type ServiceItem = {
   isActive: boolean;
 };
 
+async function uploadImage(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await fetch("/api/upload", { method: "POST", body: formData });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error ?? "Nahrávání selhalo.");
+  return data.url as string;
+}
+
+function ImagePicker({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (url: string) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+
+  const handleFile = async (file: File) => {
+    setUploadError("");
+    setUploading(true);
+    try {
+      const url = await uploadImage(file);
+      onChange(url);
+    } catch (e: any) {
+      setUploadError(e.message ?? "Chyba nahrávání.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      {value && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={value}
+          alt="náhled"
+          style={{ maxHeight: 120, maxWidth: 220, objectFit: "cover", borderRadius: 6, border: "1px solid #ddd" }}
+        />
+      )}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        style={{ display: "none" }}
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) handleFile(file);
+          e.target.value = "";
+        }}
+      />
+      <button
+        type="button"
+        className={styles.confirmBtn}
+        onClick={() => inputRef.current?.click()}
+        disabled={uploading}
+        style={{ alignSelf: "flex-start" }}
+      >
+        {uploading ? "Nahrávám…" : value ? "Změnit obrázek" : "Vybrat obrázek"}
+      </button>
+      {uploadError && <span style={{ color: "red", fontSize: 12 }}>{uploadError}</span>}
+    </div>
+  );
+}
+
 export function AdminServicesManager() {
   const [services, setServices] = useState<ServiceItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,7 +92,7 @@ export function AdminServicesManager() {
     title: "",
     description: "",
     priceFrom: 200,
-    imageUrl: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=900&q=80&fit=crop",
+    imageUrl: "",
     isActive: true,
   });
 
@@ -103,7 +171,7 @@ export function AdminServicesManager() {
         title: "",
         description: "",
         priceFrom: 200,
-        imageUrl: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=900&q=80&fit=crop",
+        imageUrl: "",
         isActive: true,
       });
     } catch {
@@ -174,11 +242,10 @@ export function AdminServicesManager() {
                   onChange={(e) => setNewService((prev) => ({ ...prev, priceFrom: Number(e.target.value || 0) }))}
                 />
 
-                <label className={styles.label}>URL obrázku</label>
-                <input
-                  className={styles.textarea}
+                <label className={styles.label}>Obrázek služby</label>
+                <ImagePicker
                   value={newService.imageUrl}
-                  onChange={(e) => setNewService((prev) => ({ ...prev, imageUrl: e.target.value }))}
+                  onChange={(url) => setNewService((prev) => ({ ...prev, imageUrl: url }))}
                 />
               </div>
               <div className={styles.adminActions}>
@@ -219,11 +286,10 @@ export function AdminServicesManager() {
                     onChange={(e) => setField(service.id, "priceFrom", Number(e.target.value || 0))}
                   />
 
-                  <label className={styles.label}>URL obrázku</label>
-                  <input
-                    className={styles.textarea}
+                  <label className={styles.label}>Obrázek služby</label>
+                  <ImagePicker
                     value={service.imageUrl}
-                    onChange={(e) => setField(service.id, "imageUrl", e.target.value)}
+                    onChange={(url) => setField(service.id, "imageUrl", url)}
                   />
 
                   <label className={styles.label}>
@@ -262,4 +328,3 @@ export function AdminServicesManager() {
     </div>
   );
 }
-

@@ -4,11 +4,10 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { formatDate, formatPrice } from "@/lib/utils";
-import { ORDER_STATUS_LABELS, SERVICE_TYPE_LABELS } from "@/types";
 import { TailorRequests } from "./TailorRequests";
 import { LogoutButton } from "./LogoutButton";
 import { AdminOrdersManager } from "./AdminOrdersManager";
+import { CustomerOrderList } from "./CustomerOrderList";
 import styles from "./dashboard.module.scss";
 
 export const metadata = { title: "Dashboard" };
@@ -44,6 +43,18 @@ export default async function DashboardPage() {
         },
         orderBy: { createdAt: "desc" },
       });
+
+  // IDs objednávek zákazníka, které již mají recenzi
+  const reviewedOrderIds: Set<string> = isCustomer
+    ? new Set(
+        (
+          await (prisma as any).review.findMany({
+            where: { customerId: user.id },
+            select: { orderId: true },
+          })
+        ).map((r: any) => r.orderId)
+      )
+    : new Set();
 
   const tailors = isAdmin
     ? await prisma.tailorProfile.findMany({
@@ -162,43 +173,20 @@ export default async function DashboardPage() {
               )}
             </div>
           ) : isCustomer ? (
-            <div className={styles.orderList}>
-              {orders.map((order) => (
-                <div key={order.id} className={styles.orderCard}>
-                  <div className={styles.orderCardLeft}>
-                    <span className={`${styles.statusBadge} ${styles[`status_${order.status}`]}`}>
-                      {ORDER_STATUS_LABELS[order.status as keyof typeof ORDER_STATUS_LABELS]}
-                    </span>
-                    <h3 className={styles.orderService}>
-                      {SERVICE_TYPE_LABELS[order.serviceType as keyof typeof SERVICE_TYPE_LABELS]}
-                    </h3>
-                    <p className={styles.orderMeta}>
-                      {order.address}, {order.city}
-                    </p>
-                    {isCustomer && (
-                      <p className={styles.orderMeta}>
-                        Krejčí: {(order as any).tailor?.user?.name ?? "Čeká na přiřazení"}
-                      </p>
-                    )}
-                    {!isCustomer && (order as any).customer && (
-                      <p className={styles.orderMeta}>
-                        Zákazník: {(order as any).customer.name}
-                      </p>
-                    )}
-                  </div>
-                  <div className={styles.orderCardRight}>
-                    <span className={styles.orderDate}>
-                      {formatDate(order.scheduledAt)}
-                    </span>
-                    {order.price && (
-                      <span className={styles.orderPrice}>
-                        {formatPrice(Number(order.price))}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <CustomerOrderList
+              orders={orders.map((order) => ({
+                id: order.id,
+                status: order.status as any,
+                serviceType: order.serviceType as any,
+                address: order.address,
+                city: order.city,
+                scheduledAt: order.scheduledAt,
+                price: order.price ? Number(order.price) : null,
+                tailorId: order.tailorId,
+                tailorName: (order as any).tailor?.user?.name ?? null,
+                hasReview: reviewedOrderIds.has(order.id),
+              }))}
+            />
           ) : isTailor ? (
             <TailorRequests
               orders={orders.map((order) => ({

@@ -76,9 +76,28 @@ type HomeService = {
   isActive: boolean;
 };
 
+type TopTailor = {
+  id: string;
+  name: string;
+  locality: string;
+  rating: number;
+  reviewCount: number;
+};
+
+function StarDisplay({ rating }: { rating: number }) {
+  const pct = `${(rating / 5) * 100}%`;
+  return (
+    <span className={styles.tailorStars}>
+      <span className={styles.tailorStarsEmpty}>★★★★★</span>
+      <span className={styles.tailorStarsFull} style={{ width: pct }}>★★★★★</span>
+    </span>
+  );
+}
+
 export default function HomePage() {
   const [current, setCurrent] = useState(0);
   const [services, setServices] = useState<HomeService[]>([]);
+  const [topTailors, setTopTailors] = useState<TopTailor[]>([]);
 
   useEffect(() => {
     const t = setInterval(() => {
@@ -100,6 +119,13 @@ export default function HomePage() {
       }
     };
     loadServices();
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/tailors/top")
+      .then((r) => r.json())
+      .then((d) => { if (d.data) setTopTailors(d.data); })
+      .catch(() => {});
   }, []);
 
   return (
@@ -249,6 +275,43 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ══════════════════════════════════════════
+          TOP KREJČÍ
+      ══════════════════════════════════════════ */}
+      {topTailors.length > 0 && (
+        <section className={styles.tailorsSection}>
+          <div className={styles.tailorsInner}>
+            <div className={styles.tailorsHeader}>
+              <span className={styles.sectionLabel}>Nejlepší hodnocení</span>
+              <h2 className={styles.sectionTitle}>
+                Krejčí, kterým<br />zákazníci důvěřují
+              </h2>
+            </div>
+            <div className={styles.tailorsGrid}>
+              {topTailors.map((tailor, i) => (
+                <div key={tailor.id} className={styles.tailorCard}>
+                  <div className={styles.tailorRank}>{String(i + 1).padStart(2, "0")}</div>
+                  <div className={styles.tailorAvatar}>
+                    {tailor.name.charAt(0).toUpperCase()}
+                  </div>
+                  <h3 className={styles.tailorName}>{tailor.name}</h3>
+                  <p className={styles.tailorLocality}>{tailor.locality}</p>
+                  <StarDisplay rating={tailor.rating} />
+                  <div className={styles.tailorRatingRow}>
+                    <span className={styles.tailorRatingVal}>
+                      {tailor.rating.toFixed(1)}
+                    </span>
+                    <span className={styles.tailorReviewCount}>
+                      ({tailor.reviewCount} {tailor.reviewCount === 1 ? "recenze" : tailor.reviewCount < 5 ? "recenze" : "recenzí"})
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ══════════════════════════════════════════
           SLOVO MAJITELE

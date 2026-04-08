@@ -60,14 +60,13 @@ model TailorProfile {
   locality        String        // Město / oblast
   specializations ServiceType[]
   isAvailable     Boolean       @default(true)
-  rating          Float         @default(0.0)
-  reviewCount     Int           @default(0)
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
   // Relations
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   orders  Order[]
+  reviews Review[]
 
   @@map("tailor_profiles")
 }
@@ -88,8 +87,23 @@ model Order {
   updatedAt   DateTime    @updatedAt
 
   // Relations
-  customer User          @relation("CustomerOrders", fields: [customerId], references: [id])
+  customer User           @relation("CustomerOrders", fields: [customerId], references: [id])
   tailor   TailorProfile? @relation(fields: [tailorId], references: [id])
+  review   Review?
 
   @@map("orders")
+}
+
+model Review {
+  id              String   @id @default(uuid())
+  orderId         String   @unique
+  tailorProfileId String
+  customerId      String
+  rating          Int      // 1–5
+  createdAt       DateTime @default(now())
+
+  order  Order         @relation(fields: [orderId], references: [id])
+  tailor TailorProfile @relation(fields: [tailorProfileId], references: [id])
+
+  @@map("reviews")
 }

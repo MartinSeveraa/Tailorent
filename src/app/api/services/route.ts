@@ -13,7 +13,9 @@ const createServiceSchema = z.object({
   title: z.string().min(2).max(120),
   description: z.string().min(2).max(500),
   priceFrom: z.number().positive(),
-  imageUrl: z.string().url(),
+  imageUrl: z.string().min(1).refine((v) => v.startsWith("/") || /^https?:\/\//.test(v), {
+    message: "imageUrl musí být platná URL nebo cesta začínající /",
+  }),
   isActive: z.boolean(),
 });
 
