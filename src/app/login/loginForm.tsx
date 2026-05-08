@@ -1,15 +1,24 @@
 "use client";
 // src/app/login/LoginForm.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import styles from "./login.module.scss";
 
 export default function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
   const registered = params.get("registered");
+  const { data: session, status } = useSession();
+  const role = (session?.user as any)?.role as string | undefined;
+
+  useEffect(() => {
+    if (status === "loading") return;
+    if (session) {
+      router.replace(role === "ADMIN" ? "/admin/orders" : "/dashboard");
+    }
+  }, [session, status, role, router]);
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
