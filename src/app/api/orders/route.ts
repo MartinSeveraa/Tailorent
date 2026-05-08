@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createOrderSchema } from "@/lib/validations";
+import { findMatchingTailor } from "@/lib/matching";
 
 export async function GET(req: NextRequest) {
   try {
@@ -14,8 +15,12 @@ export async function GET(req: NextRequest) {
 
     const user = session.user as any;
 
-    // Admin vidí vše, zákazník jen své objednávky
-    const where = user.role === "ADMIN" ? {} : { customerId: user.id };
+    const where =
+      user.role === "ADMIN"
+        ? {}
+        : user.role === "TAILOR"
+        ? { tailor: { userId: user.id } }
+        : { customerId: user.id };
 
     const orders = await prisma.order.findMany({
       where,
@@ -53,11 +58,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const tailorId = await findMatchingTailor(
+      parsed.data.city,
+      parsed.data.serviceType
+    );
+
     const order = await prisma.order.create({
       data: {
         ...parsed.data,
         scheduledAt: new Date(parsed.data.scheduledAt),
         customerId: user.id,
+        ...(tailorId && { tailorId, status: "CONFIRMED" }),
       },
     });
 

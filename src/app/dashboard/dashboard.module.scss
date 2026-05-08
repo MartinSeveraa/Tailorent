@@ -135,6 +135,29 @@ $gold-lt: #e0c278;
   }
 }
 
+.sidebarBottom {
+  padding: 16px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.logoutBtn {
+  width: 100%;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.4);
+  font-size: 0.78rem;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 200ms;
+  text-align: left;
+  font-family: var(--font-body);
+
+  &:hover {
+    border-color: rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.7);
+  }
+}
+
 // ─────────────────────────────────────────
 // MAIN
 // ─────────────────────────────────────────
@@ -145,6 +168,16 @@ $gold-lt: #e0c278;
   @media (max-width: #{$bp-md}) {
     padding: 24px 20px;
   }
+}
+
+// ── SUCCESS BANNER ──
+.successBanner {
+  background: rgba(34,197,94,0.08);
+  border: 1px solid rgba(34,197,94,0.25);
+  color: #4ade80;
+  font-size: 0.85rem;
+  padding: 14px 18px;
+  margin-bottom: 28px;
 }
 
 // ── TOP BAR ──
@@ -285,6 +318,8 @@ $gold-lt: #e0c278;
   justify-content: space-between;
   gap: 16px;
   transition: background 200ms;
+  text-decoration: none;
+  cursor: pointer;
 
   &:hover { background: $dark-4; }
 }
@@ -343,3 +378,40 @@ $gold-lt: #e0c278;
 .status_IN_PROGRESS { background: rgba(168,85,247,0.12);  color: #c084fc; }
 .status_COMPLETED   { background: rgba(34,197,94,0.12);   color: #4ade80; }
 .status_CANCELLED   { background: rgba(239,68,68,0.12);   color: #f87171; }
+
+// ── ACTION BUTTONS ──
+.actionBtn {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  background: rgba(201,168,76,0.12);
+  color: $gold;
+  border: 1px solid rgba(201,168,76,0.25);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: background 150ms;
+
+  &:hover:not(:disabled) { background: rgba(201,168,76,0.2); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.actionBtnSuccess {
+  @extend .actionBtn;
+  background: rgba(34,197,94,0.1);
+  color: #4ade80;
+  border-color: rgba(34,197,94,0.25);
+
+  &:hover:not(:disabled) { background: rgba(34,197,94,0.18); }
+}
+
+.actionBtnDanger {
+  @extend .actionBtn;
+  background: rgba(239,68,68,0.1);
+  color: #f87171;
+  border-color: rgba(239,68,68,0.25);
+
+  &:hover:not(:disabled) { background: rgba(239,68,68,0.18); }
+}

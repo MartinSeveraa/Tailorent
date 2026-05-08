@@ -2,6 +2,7 @@
 // src/components/layout/Header/Header.tsx
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import styles from "./Header.module.scss";
 
 const NAV_LINKS = [
@@ -12,6 +13,8 @@ const NAV_LINKS = [
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
+  const { data: session, status } = useSession();
+  const role = (session?.user as any)?.role as string | undefined;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
@@ -35,8 +38,25 @@ export function Header() {
         </nav>
 
         <div className={styles.actions}>
-          <Link href="/login" className={styles.login}>Přihlásit</Link>
-          <Link href="/register" className={styles.cta}>Objednat</Link>
+          {status === "loading" ? null : !session ? (
+            // Nepřihlášen
+            <>
+              <Link href="/login" className={styles.login}>Přihlásit</Link>
+              <Link href="/register" className={styles.cta}>Objednat</Link>
+            </>
+          ) : role === "ADMIN" ? (
+            // Admin
+            <Link href="/admin/orders" className={styles.cta}>Admin panel</Link>
+          ) : role === "TAILOR" ? (
+            // Krejčí
+            <Link href="/dashboard" className={styles.login}>Dashboard</Link>
+          ) : (
+            // Zákazník
+            <>
+              <Link href="/dashboard" className={styles.login}>Moje objednávky</Link>
+              <Link href="/orders/new" className={styles.cta}>Objednat</Link>
+            </>
+          )}
         </div>
       </div>
     </header>

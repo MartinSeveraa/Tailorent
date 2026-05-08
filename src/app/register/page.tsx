@@ -1,12 +1,22 @@
 "use client";
 // src/app/register/page.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import styles from "./register.module.scss";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
+  const role = (session?.user as any)?.role as string | undefined;
+
+  useEffect(() => {
+    if (status === "loading") return;
+    if (session) {
+      router.replace(role === "ADMIN" ? "/admin/orders" : "/dashboard");
+    }
+  }, [session, status, role, router]);
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);

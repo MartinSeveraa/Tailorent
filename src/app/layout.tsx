@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Playfair_Display, DM_Sans } from "next/font/google";
 import { Providers } from "@/components/providers/Providers";
-import { Header } from "@/components/layout/Header/Header";
-import { Footer } from "@/components/layout/Footer/Footer";
+import { ConditionalWrapper } from "@/components/layout/ConditionalWrapper";
 import "@/styles/globals.scss";
 
 const playfair = Playfair_Display({
@@ -30,9 +29,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="cs" className={`${playfair.variable} ${dmSans.variable}`}>
       <body>
         <Providers>
-          <Header />
-          {children}
-          <Footer />
+          <ConditionalWrapper>
+            {children}
+          </ConditionalWrapper>
         </Providers>
       </body>
     </html>

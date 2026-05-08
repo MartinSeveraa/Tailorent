@@ -52,6 +52,22 @@ $gold-lt: #e0c278;
   span { color: $gold; }
 }
 
+.sidebarNav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebarNavLink {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.4);
+  text-decoration: none;
+  padding: 6px 0;
+  transition: color 200ms;
+
+  &:hover { color: rgba(255,255,255,0.8); }
+}
+
 .sidebarContent {
   flex: 1;
 }
@@ -234,6 +250,19 @@ $gold-lt: #e0c278;
 .serviceCardActive {
   background: rgba(201,168,76,0.06) !important;
   border-color: $gold !important;
+}
+
+.serviceCardDisabled {
+  opacity: 0.45;
+  cursor: not-allowed !important;
+  &:hover { background: $dark-3 !important; border-color: transparent !important; }
+}
+
+.serviceUnavailable {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 0.06em;
+  margin-top: 2px;
 }
 
 .serviceIcon {

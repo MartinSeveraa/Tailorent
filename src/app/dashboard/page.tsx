@@ -6,31 +6,41 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { formatDate, formatPrice } from "@/lib/utils";
 import { ORDER_STATUS_LABELS, SERVICE_TYPE_LABELS } from "@/types";
+import DashboardSidebar from "./DashboardSidebar";
 import styles from "./dashboard.module.scss";
 
 export const metadata = { title: "Dashboard" };
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ ordered?: string }>;
+}) {
   const session = await getServerSession(authOptions);
   if (!session?.user) redirect("/login");
 
+  const { ordered } = await searchParams;
   const user = session.user as any;
-  const isCustomer = user.role === "CUSTOMER";
+  const role: string = user.role;
+
+  if (role === "ADMIN") redirect("/admin/orders");
 
   // ── Data fetch ──────────────────────────────────────────────
-  const orders = isCustomer
-    ? await prisma.order.findMany({
-        where: { customerId: user.id },
-        include: { tailor: { include: { user: true } } },
-        orderBy: { createdAt: "desc" },
-      })
-    : await prisma.order.findMany({
-        where: {
-          tailor: { userId: user.id },
-        },
-        include: { customer: true },
-        orderBy: { scheduledAt: "asc" },
-      });
+  let orders: any[] = [];
+
+  if (role === "CUSTOMER") {
+    orders = await prisma.order.findMany({
+      where: { customerId: user.id },
+      include: { tailor: { include: { user: true } } },
+      orderBy: { createdAt: "desc" },
+    });
+  } else if (role === "TAILOR") {
+    orders = await prisma.order.findMany({
+      where: { tailor: { userId: user.id } },
+      include: { customer: true },
+      orderBy: { scheduledAt: "asc" },
+    });
+  }
 
   const statusCount = {
     active: orders.filter((o) =>
@@ -40,40 +50,23 @@ export default async function DashboardPage() {
     total: orders.length,
   };
 
+  const isCustomer = role === "CUSTOMER";
+  const isTailor = role === "TAILOR";
+
   return (
     <div className={styles.page}>
       {/* ── Sidebar ── */}
-      <aside className={styles.sidebar}>
-        <div className={styles.sidebarLogo}>
-          <Link href="/">Tailor<span>ent</span></Link>
-        </div>
-
-        <nav className={styles.sidebarNav}>
-          <Link href="/dashboard" className={`${styles.sidebarLink} ${styles.sidebarLinkActive}`}>
-            <span className={styles.sidebarIcon}>◈</span>
-            Dashboard
-          </Link>
-          {isCustomer && (
-            <Link href="/orders/new" className={styles.sidebarLink}>
-              <span className={styles.sidebarIcon}>＋</span>
-              Nová objednávka
-            </Link>
-          )}
-        </nav>
-
-        <div className={styles.sidebarUser}>
-          <div className={styles.sidebarAvatar}>
-            {user.name?.charAt(0).toUpperCase()}
-          </div>
-          <div className={styles.sidebarUserInfo}>
-            <strong>{user.name}</strong>
-            <span>{isCustomer ? "Zákazník" : "Krejčí"}</span>
-          </div>
-        </div>
-      </aside>
+      <DashboardSidebar userName={user.name} isCustomer={isCustomer} />
 
       {/* ── Main ── */}
       <main className={styles.main}>
+        {/* Success banner */}
+        {ordered === "1" && (
+          <div className={styles.successBanner}>
+            Objednávka byla úspěšně odeslána. Brzy vás kontaktujeme s potvrzením.
+          </div>
+        )}
+
         {/* Header */}
         <div className={styles.topBar}>
           <div>
@@ -129,9 +122,15 @@ export default async function DashboardPage() {
           ) : (
             <div className={styles.orderList}>
               {orders.map((order) => (
-                <div key={order.id} className={styles.orderCard}>
+                <Link
+                  key={order.id}
+                  href={`/dashboard/orders/${order.id}`}
+                  className={styles.orderCard}
+                >
                   <div className={styles.orderCardLeft}>
-                    <span className={`${styles.statusBadge} ${styles[`status_${order.status}`]}`}>
+                    <span
+                      className={`${styles.statusBadge} ${styles[`status_${order.status}`]}`}
+                    >
                       {ORDER_STATUS_LABELS[order.status as keyof typeof ORDER_STATUS_LABELS]}
                     </span>
                     <h3 className={styles.orderService}>
@@ -140,14 +139,14 @@ export default async function DashboardPage() {
                     <p className={styles.orderMeta}>
                       {order.address}, {order.city}
                     </p>
-                    {isCustomer && (order as any).tailor && (
+                    {isCustomer && order.tailor && (
                       <p className={styles.orderMeta}>
-                        Krejčí: {(order as any).tailor.user.name}
+                        Krejčí: {order.tailor.user.name}
                       </p>
                     )}
-                    {!isCustomer && (order as any).customer && (
+                    {isTailor && order.customer && (
                       <p className={styles.orderMeta}>
-                        Zákazník: {(order as any).customer.name}
+                        Zákazník: {order.customer.name}
                       </p>
                     )}
                   </div>
@@ -161,7 +160,7 @@ export default async function DashboardPage() {
                       </span>
                     )}
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}
