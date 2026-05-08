@@ -15,6 +15,7 @@ $gold-lt: #e0c278;
 
   @media (max-width: #{$bp-md}) {
     grid-template-columns: 1fr;
+    min-height: calc(100svh - var(--header-height));
   }
 }
 
@@ -32,6 +33,11 @@ $gold-lt: #e0c278;
   flex-direction: column;
   justify-content: space-between;
   padding: 40px 48px;
+
+  // Header je `position: fixed`, takže na desktopu odsazujeme obsah pod něj.
+  @media (min-width: 769px) {
+    padding: calc(var(--header-height) + 16px) 48px 40px;
+  }
 
   // Gradient overlay
   &::before {
@@ -131,6 +137,11 @@ $gold-lt: #e0c278;
   align-items: center;
   justify-content: center;
   padding: 48px 40px;
+
+  // Odsazení obsahu pod fixní hlavičku (jen desktop).
+  @media (min-width: 769px) {
+    padding: calc(var(--header-height) + 16px) 40px 48px;
+  }
 
   @media (max-width: #{$bp-md}) {
     padding: 40px 24px;

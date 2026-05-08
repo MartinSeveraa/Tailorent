@@ -13,8 +13,12 @@ const NAV_LINKS = [
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
+<<<<<<< HEAD
   const { data: session, status } = useSession();
   const role = (session?.user as any)?.role as string | undefined;
+=======
+  const { data: session } = useSession();
+>>>>>>> b6345f9e66398eff7221d98f9b9fcd5e3dcea76a
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
@@ -38,6 +42,7 @@ export function Header() {
         </nav>
 
         <div className={styles.actions}>
+<<<<<<< HEAD
           {status === "loading" ? null : !session ? (
             // Nepřihlášen
             <>
@@ -57,6 +62,20 @@ export function Header() {
               <Link href="/orders/new" className={styles.cta}>Objednat</Link>
             </>
           )}
+=======
+          {session?.user ? (
+            <Link href="/dashboard" className={styles.account} aria-label="Můj účet">
+              <span className={styles.accountIcon}>
+                {session.user.name?.charAt(0).toUpperCase() ?? "U"}
+              </span>
+            </Link>
+          ) : (
+            <Link href="/login" className={styles.login}>Přihlásit</Link>
+          )}
+          <Link href={session?.user ? "/dashboard" : "/register"} className={styles.cta}>
+            Objednat
+          </Link>
+>>>>>>> b6345f9e66398eff7221d98f9b9fcd5e3dcea76a
         </div>
       </div>
     </header>

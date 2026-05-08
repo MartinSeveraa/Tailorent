@@ -1,38 +1,63 @@
-// src/app/api/services/route.ts
 import { NextResponse } from "next/server";
+import { promises as fs } from "fs";
+import path from "path";
+import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { createServiceSchema } from "@/lib/validations";
+import { z } from "zod";
+
+const SERVICES_PATH = path.join(process.cwd(), "data", "services.json");
+const serviceTypeSchema = z.enum(["ALTERATION", "CUSTOM_SEWING", "EXPRESS"]);
+const createServiceSchema = z.object({
+  serviceType: serviceTypeSchema,
+  title: z.string().min(2).max(120),
+  description: z.string().min(2).max(500),
+  priceFrom: z.number().positive(),
+  imageUrl: z.string().min(1).refine((v) => v.startsWith("/") || /^https?:\/\//.test(v), {
+    message: "imageUrl musí být platná URL nebo cesta začínající /",
+  }),
+  isActive: z.boolean(),
+});
 
 export async function GET() {
-  const services = await prisma.service.findMany({ orderBy: { createdAt: "asc" } });
-  return NextResponse.json({ data: services });
+  try {
+    const raw = await fs.readFile(SERVICES_PATH, "utf-8");
+    const data = JSON.parse(raw);
+    return NextResponse.json({ data });
+  } catch (error) {
+    console.error("[GET /api/services]", error);
+    return NextResponse.json({ error: "Interní chyba serveru" }, { status: 500 });
+  }
 }
 
-export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  const user = session?.user as any;
-  if (!user || user.role !== "ADMIN") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+export async function POST(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!(session?.user as any) || (session!.user as any).role !== "ADMIN") {
+      return NextResponse.json({ error: "Pouze admin může přidávat služby." }, { status: 403 });
+    }
 
-  const body = await req.json();
-  const parsed = createServiceSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.errors[0].message }, { status: 400 });
-  }
-
-  if (parsed.data.showOnHomepage) {
-    const count = await prisma.service.count({ where: { showOnHomepage: true } });
-    if (count >= 3) {
+    const body = await req.json();
+    const parsed = createServiceSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Na homepage lze zobrazit nejvýše 3 služby. Nejdříve odeberte jednu." },
-        { status: 422 }
+        { error: "Neplatná data", details: parsed.error.flatten() },
+        { status: 400 }
       );
     }
-  }
 
-  const service = await prisma.service.create({ data: parsed.data });
-  return NextResponse.json({ data: service }, { status: 201 });
+    const raw = await fs.readFile(SERVICES_PATH, "utf-8");
+    const services = JSON.parse(raw) as Array<any>;
+    const id = `service_${Date.now()}`;
+
+    const newService = { id, ...parsed.data };
+    services.push(newService);
+
+    await fs.writeFile(SERVICES_PATH, JSON.stringify(services, null, 2), "utf-8");
+    return NextResponse.json({ data: newService }, { status: 201 });
+  } catch (error) {
+    console.error("[POST /api/services]", error);
+    return NextResponse.json({ error: "Interní chyba serveru" }, { status: 500 });
+  }
 }
+

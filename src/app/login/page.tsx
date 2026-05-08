@@ -1,5 +1,6 @@
 "use client";
 // src/app/login/page.tsx
+<<<<<<< HEAD
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -53,88 +54,15 @@ export default function LoginPage() {
     }
   };
 
+=======
+import { Suspense } from "react";
+import LoginForm from "./loginForm";
+
+export default function LoginPage() {
+>>>>>>> b6345f9e66398eff7221d98f9b9fcd5e3dcea76a
   return (
-    <div className={styles.page}>
-      {/* Left — branding */}
-      <div className={styles.left}>
-        <div className={styles.leftContent}>
-          <p className={styles.leftLabel}>Přihlášení</p>
-          <h1 className={styles.leftTitle}>
-            Vítejte<br /><em>zpět</em>
-          </h1>
-          <p className={styles.leftSub}>
-            Spravujte své objednávky a sledujte jejich stav v reálném čase.
-          </p>
-        </div>
-        <div className={styles.leftFooter}>
-          © {new Date().getFullYear()} Tailorent s.r.o.
-        </div>
-      </div>
-
-      {/* Right — form */}
-      <div className={styles.right}>
-        <div className={styles.formWrap}>
-          <h2 className={styles.formTitle}>Přihlásit se</h2>
-          <p className={styles.formSub}>
-            Nemáte účet?{" "}
-            <Link href="/register" className={styles.formLink}>
-              Zaregistrujte se
-            </Link>
-          </p>
-
-          {registered && (
-            <div className={styles.success}>
-              Registrace proběhla úspěšně. Nyní se přihlaste.
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className={styles.form}>
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="email">
-                E-mail
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={form.email}
-                onChange={handleChange}
-                className={styles.input}
-                placeholder="jan@example.cz"
-              />
-            </div>
-
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="password">
-                Heslo
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={form.password}
-                onChange={handleChange}
-                className={styles.input}
-                placeholder="Vaše heslo"
-              />
-            </div>
-
-            {error && <p className={styles.error}>{error}</p>}
-
-            <button
-              type="submit"
-              className={styles.submit}
-              disabled={loading}
-            >
-              {loading ? "Přihlašuji..." : "Přihlásit se"}
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }

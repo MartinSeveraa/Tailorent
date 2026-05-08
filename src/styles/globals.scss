@@ -20,6 +20,12 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  // Header je `position: fixed`, takže na mobilu odsazujeme obsah, aby nepřekrýval hlavičku.
+  padding-top: 0;
+
+  @media (max-width: variables.$bp-md) {
+    padding-top: var(--header-height);
+  }
 }
 
 h1, h2, h3, h4, h5, h6 {
