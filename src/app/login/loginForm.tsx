@@ -56,6 +56,9 @@ export default function LoginForm() {
   return (
     <div className={styles.page}>
       <div className={styles.left}>
+        <Link href="/" className={styles.logo}>
+          Tailor<span>ent</span>
+        </Link>
         <div className={styles.leftContent}>
           <p className={styles.leftLabel}>Přihlášení</p>
           <h1 className={styles.leftTitle}>
@@ -72,6 +75,9 @@ export default function LoginForm() {
 
       <div className={styles.right}>
         <div className={styles.formWrap}>
+          <Link href="/" className={styles.logoMobile}>
+            Tailor<span>ent</span>
+          </Link>
           <h2 className={styles.formTitle}>Přihlásit se</h2>
           <p className={styles.formSub}>
             Nemáte účet?{" "}

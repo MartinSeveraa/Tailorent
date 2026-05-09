@@ -26,6 +26,7 @@
 10. [Správa krejčích](#10-správa-krejčích)
 11. [Správa objednávek](#11-správa-objednávek)
 12. [Správa uživatelů](#12-správa-uživatelů)
+12b. [Správa katalogových služeb](#12b-správa-katalogových-služeb)
 13. [Technická správa systému](#13-technická-správa-systému)
 
 ---
@@ -212,6 +213,16 @@ Objednávku ve stavu **„Čekající"** nebo **„Potvrzená"** můžete zruši
 
 Cena se zobrazí na kartě objednávky poté, co ji nastaví administrátor po konzultaci s krejčím. Dokud cena není stanovena, zobrazuje se „—".
 
+### 4.5 Hodnocení krejčího
+
+Po dokončení zakázky (stav „Dokončená") se na detailu objednávky zobrazí možnost ohodnotit krejčího:
+
+1. Přejděte na detail příslušné objednávky
+2. V sekci „Hodnocení" vyberte počet hvězdiček (1 = nejhorší, 5 = nejlepší)
+3. Klikněte na **„Odeslat hodnocení"**
+
+Hodnocení ovlivňuje průměrné skóre krejčího a jeho postavení v žebříčku na hlavní stránce. Každou zakázku lze ohodnotit pouze jednou — opakovaný pokus bude odmítnut.
+
 ---
 
 ## 5. Časté dotazy zákazníků
@@ -233,6 +244,9 @@ Kontaktujte nás prostřednictvím e-mailu podpory. Situaci vyřešíme přednos
 
 **Mohu objednat pro jinou adresu, než je moje bydliště?**  
 Ano, při vytváření objednávky zadáte libovolnou adresu.
+
+**Jak ohodnotím krejčího?**  
+Po dokončení zakázky se na detailu objednávky zobrazí sekce hodnocení. Vyberte 1–5 hvězdiček a odešlete. Každou zakázku lze ohodnotit pouze jednou.
 
 ---
 
@@ -328,6 +342,11 @@ Po přihlášení máte přístup k:
 - **Dashboard** — přehled všech objednávek a statistik
 - **Objednávky** (`/admin/orders`) — správa všech objednávek
 - **Krejčí** (`/admin/tailors`) — správa krejčích a jejich profilů
+- **Služby** (`/admin/services`) — správa katalogu nabízených služeb
+
+### 9.3 API dokumentace
+
+Interaktivní dokumentace všech REST API endpointů je dostupná na adrese `/api/docs`. Rozhraní Swagger UI umožňuje prohlížení endpointů, jejich parametrů a testování přímo v prohlížeči bez nutnosti externího nástroje.
 
 ---
 
@@ -465,6 +484,63 @@ Pro povýšení zákazníka na krejčího:
 1. Najděte uživatele v databázi nebo admin rozhraní
 2. Změňte roli na `TAILOR`
 3. Vytvořte mu profil krejčího (lokalita, specializace)
+
+---
+
+## 12b. Správa katalogových služeb
+
+### 12b.1 Přehled sekce Služby
+
+Na **Admin → Služby** vidíte přehled všech katalogových služeb s statistikami:
+- Celkový počet služeb
+- Počet aktivních služeb
+- Počet služeb zobrazených na homepage (max 3)
+
+### 12b.2 Přidání nové služby
+
+1. Přejděte na **Admin → Služby**
+2. Klikněte na **„+ Přidat službu"**
+3. Vyplňte formulář:
+
+| Pole | Popis | Povinné |
+|------|-------|---------|
+| **Název** | Název služby (min. 2 znaky) | Ano |
+| **Popis** | Detailní popis | Ne |
+| **Ikona** | Emoji nebo text (výchozí ✂) | Ne |
+| **Základní cena (Kč)** | Orientační cena od | Ano |
+| **Aktivní** | Zda je služba viditelná zákazníkům | Ano |
+| **Zobrazit na homepage** | Zda se zobrazí na hlavní stránce | Ne |
+| **Typ objednávky** | Vazba na typ (ALTERATION / CUSTOM_SEWING / EXPRESS) | Ne |
+
+4. Uložte
+
+> **Omezení:** Na hlavní stránce lze zobrazit nejvýše **3 služby**. Pokud jsou již 3 služby nastaveny pro homepage, systém přidání další odmítne s chybou. Nejdříve odeberte zobrazení u stávající služby.
+
+### 12b.3 Úprava služby
+
+1. Přejděte na **Admin → Služby**
+2. Klikněte na příslušnou službu
+3. Proveďte požadované změny
+4. Uložte
+
+### 12b.4 Deaktivace služby
+
+Deaktivovaná služba není viditelná zákazníkům při objednávce, ale zůstane v systému.
+
+1. Přejděte na **Admin → Služby**
+2. U příslušné služby přepněte přepínač **„Aktivní"** na neaktivní
+
+### 12b.5 Smazání služby
+
+> **Upozornění:** Smazání je nevratné. Existující objednávky nejsou ovlivněny.
+
+1. Přejděte na **Admin → Služby**
+2. Otevřete detail služby
+3. Klikněte na **„Smazat"** a potvrďte
+
+### 12b.6 Upload obrázku (pro ikony služeb)
+
+Administrátor může nahrát vlastní obrázek přes endpoint `/api/upload`. Povolené formáty jsou JPEG, PNG, WebP a GIF, maximální velikost je 5 MB. URL nahraného souboru lze poté použít jako ikonu nebo obrázek služby.
 
 ---
 

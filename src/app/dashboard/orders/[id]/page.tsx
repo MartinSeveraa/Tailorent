@@ -34,6 +34,7 @@ export default async function OrderDetailPage({
       tailor: {
         include: { user: { select: { id: true, name: true, email: true } } },
       },
+      review: { select: { rating: true } },
     },
   });
 
@@ -117,7 +118,12 @@ export default async function OrderDetailPage({
           </div>
 
           {/* Akce */}
-          <OrderDetailActions orderId={order.id} status={order.status} role={role} />
+          <OrderDetailActions
+            orderId={order.id}
+            status={order.status}
+            role={role}
+            existingRating={order.review?.rating ?? null}
+          />
         </div>
       </main>
     </div>

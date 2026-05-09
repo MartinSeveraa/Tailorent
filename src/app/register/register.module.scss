@@ -24,8 +24,7 @@ $gold-lt: #e0c278;
 // ─────────────────────────────────────────
 .left {
   background: $dark;
-  background-image:
-    url("https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&q=60&fit=crop");
+  background-image: url('/images/register.jpg');
   background-size: cover;
   background-position: center;
   position: relative;
@@ -152,6 +151,23 @@ $gold-lt: #e0c278;
 .formWrap {
   width: 100%;
   max-width: 400px;
+}
+
+.logoMobile {
+  display: none;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  margin-bottom: 32px;
+
+  span { color: $gold; }
+
+  @media (max-width: #{$bp-md}) {
+    display: block;
+  }
 }
 
 .formTitle {

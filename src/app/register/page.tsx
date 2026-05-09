@@ -56,6 +56,9 @@ export default function RegisterPage() {
     <div className={styles.page}>
       {/* Left — branding */}
       <div className={styles.left}>
+        <Link href="/" className={styles.logo}>
+          Tailor<span>ent</span>
+        </Link>
         <div className={styles.leftContent}>
           <p className={styles.leftLabel}>Nový účet</p>
           <h1 className={styles.leftTitle}>
@@ -73,6 +76,9 @@ export default function RegisterPage() {
       {/* Right — form */}
       <div className={styles.right}>
         <div className={styles.formWrap}>
+          <Link href="/" className={styles.logoMobile}>
+            Tailor<span>ent</span>
+          </Link>
           <h2 className={styles.formTitle}>Vytvořit účet</h2>
           <p className={styles.formSub}>
             Již máte účet?{" "}

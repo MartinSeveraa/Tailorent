@@ -97,12 +97,13 @@ Tailorent využívá **monolitickou serverless architekturu** postavenou na fram
 ```
 Tailorent/
 ├── prisma/
-│   ├── schema.prisma           # Definice datového modelu
+│   ├── schema.prisma           # Definice datového modelu (User, TailorProfile, Service, Order, Review)
 │   ├── seed.ts                 # Seed script (testovací data)
 │   └── migrations/             # Verzované databázové migrace
 │
 ├── public/
-│   └── images/                 # Statické obrázky (hero, atd.)
+│   ├── images/                 # Statické obrázky (hero, register, atd.)
+│   └── uploads/                # Uživatelsky nahrané obrázky (admin upload)
 │
 ├── src/
 │   ├── app/                    # Next.js App Router
@@ -110,36 +111,79 @@ Tailorent/
 │   │   │   ├── auth/
 │   │   │   │   ├── register/route.ts
 │   │   │   │   └── [...nextauth]/route.ts
-│   │   │   └── orders/
-│   │   │       ├── route.ts
-│   │   │       └── [id]/route.ts
-│   │   ├── (auth)/             # Route Group pro auth stránky
-│   │   │   ├── login/
-│   │   │   └── register/
-│   │   ├── (customer)/         # Route Group pro zákaznické stránky
-│   │   │   ├── dashboard/
-│   │   │   └── orders/
-│   │   ├── (admin)/            # Route Group pro admin stránky
-│   │   │   └── admin/
-│   │   ├── layout.tsx          # Root layout
-│   │   └── page.tsx            # Hlavní stránka (/)
+│   │   │   ├── orders/
+│   │   │   │   ├── route.ts
+│   │   │   │   └── [id]/
+│   │   │   │       ├── route.ts
+│   │   │   │       └── review/route.ts  # Hodnocení krejčího
+│   │   │   ├── tailors/
+│   │   │   │   ├── route.ts             # GET seznam / POST vytvoření
+│   │   │   │   ├── top/route.ts         # GET top 3 dle ratingu (veřejný)
+│   │   │   │   └── [id]/route.ts        # GET / PUT / DELETE
+│   │   │   ├── services/
+│   │   │   │   ├── route.ts             # GET seznam (veřejný) / POST vytvoření
+│   │   │   │   └── [id]/route.ts        # PUT / DELETE
+│   │   │   ├── upload/route.ts          # POST nahrání obrázku (admin)
+│   │   │   └── docs/
+│   │   │       ├── route.ts             # GET Swagger UI HTML
+│   │   │       └── openapi/route.ts     # GET OpenAPI JSON spec
+│   │   ├── admin/                       # Administrátorské stránky
+│   │   │   ├── layout.tsx
+│   │   │   ├── page.tsx                 # Admin dashboard
+│   │   │   ├── AdminSidebar.tsx
+│   │   │   ├── orders/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── [id]/
+│   │   │   │       ├── page.tsx
+│   │   │   │       └── AdminOrderDetail.tsx
+│   │   │   ├── tailors/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── TailorItem.tsx
+│   │   │   │   ├── new/page.tsx
+│   │   │   │   └── [id]/
+│   │   │   │       ├── page.tsx
+│   │   │   │       └── EditTailorForm.tsx
+│   │   │   └── services/
+│   │   │       ├── page.tsx
+│   │   │       ├── ServiceItem.tsx
+│   │   │       ├── new/page.tsx
+│   │   │       └── [id]/
+│   │   │           ├── page.tsx
+│   │   │           └── EditServiceForm.tsx
+│   │   ├── dashboard/                   # Zákaznický / krejčí dashboard
+│   │   │   ├── page.tsx
+│   │   │   ├── DashboardSidebar.tsx
+│   │   │   ├── CustomerOrderList.tsx
+│   │   │   ├── TailorRequests.tsx
+│   │   │   ├── AdminOrdersManager.tsx
+│   │   │   ├── AdminServicesManager.tsx
+│   │   │   ├── OrderActions.tsx
+│   │   │   ├── LogoutButton.tsx
+│   │   │   ├── services/page.tsx
+│   │   │   └── orders/[id]/
+│   │   │       ├── page.tsx
+│   │   │       └── OrderDetailActions.tsx
+│   │   ├── login/
+│   │   │   ├── page.tsx
+│   │   │   └── loginForm.tsx
+│   │   ├── register/
+│   │   │   └── page.tsx
+│   │   ├── orders/new/
+│   │   │   ├── page.tsx
+│   │   │   └── NewOrderClient.tsx       # Multi-step wizard
+│   │   ├── HomeClient.tsx               # Klientská část hlavní stránky
+│   │   ├── layout.tsx                   # Root layout
+│   │   └── page.tsx                     # Hlavní stránka (/)
 │   │
 │   ├── components/
 │   │   ├── ui/                 # Znovupoužitelné UI prvky
-│   │   │   ├── Button/
-│   │   │   ├── Input/
-│   │   │   ├── Card/
-│   │   │   └── Badge/
+│   │   │   └── Button/
 │   │   ├── layout/             # Layoutové komponenty
 │   │   │   ├── Header/
-│   │   │   └── Footer/
-│   │   ├── features/           # Doménové komponenty
-│   │   │   ├── OrderForm/
-│   │   │   ├── TailorCard/
-│   │   │   ├── ServicePicker/
-│   │   │   └── BookingCalendar/
+│   │   │   ├── Footer/
+│   │   │   └── ConditionalWrapper.tsx
 │   │   └── providers/
-│   │       └── Providers.tsx   # React context providers
+│   │       └── Providers.tsx   # SessionProvider wrapper
 │   │
 │   ├── lib/
 │   │   ├── auth.ts             # NextAuth konfigurace
@@ -147,11 +191,6 @@ Tailorent/
 │   │   ├── validations.ts      # Zod schémata
 │   │   ├── matching.ts         # Algoritmus párování krejčích
 │   │   └── utils.ts            # Pomocné funkce
-│   │
-│   ├── styles/
-│   │   ├── globals.scss        # Globální styly
-│   │   ├── variables.scss      # Design tokeny
-│   │   └── mixins.scss         # SCSS mixiny (media queries)
 │   │
 │   ├── types/
 │   │   └── index.ts            # Sdílené TypeScript typy
@@ -205,14 +244,14 @@ Zákazník vyplní formulář
 │ passwordHash    │         │ locality              │
 │ role (enum)     │         │ specializations[]     │
 │ createdAt       │         │ isAvailable           │
-│ updatedAt       │         │ rating                │
+│ updatedAt       │         │ rating (vypočítáno)   │
 └────────┬────────┘         │ reviewCount           │
          │                  │ createdAt, updatedAt  │
-         │                  └──────────┬────────────┘
-         │                             │
-         │1:N                          │1:N
-         │                             │
-         ▼                             ▼
+         │                  └──────┬───────────────┘
+         │                         │
+         │1:N                      │1:N
+         │                         │
+         ▼                         ▼
 ┌──────────────────────────────────────────────────┐
 │                      Order                        │
 ├──────────────────────────────────────────────────┤
@@ -229,7 +268,33 @@ Zákazník vyplní formulář
 │ price (Decimal 10,2, nullable)                   │
 │ notes (nullable, interní)                        │
 │ createdAt, updatedAt                             │
+└────────────────────┬─────────────────────────────┘
+                     │1:1 (nullable)
+                     ▼
+┌──────────────────────────────────────────────────┐
+│                     Review                        │
+├──────────────────────────────────────────────────┤
+│ id (PK, UUID)                                    │
+│ orderId (FK→Order, UNIQUE)                       │
+│ tailorProfileId (FK→TailorProfile)               │
+│ customerId (FK→User)                             │
+│ rating (INT 1–5)                                 │
+│ createdAt                                        │
 └──────────────────────────────────────────────────┘
+
+┌──────────────────────────────────┐
+│             Service               │
+├──────────────────────────────────┤
+│ id (PK, UUID)                    │
+│ name                             │
+│ description (nullable)           │
+│ icon (výchozí ✂)                │
+│ basePrice (INT, min 0)           │
+│ isActive (BOOLEAN, výchozí true) │
+│ showOnHomepage (BOOLEAN)         │
+│ typeKey (nullable, enum klíč)    │
+│ createdAt, updatedAt             │
+└──────────────────────────────────┘
 ```
 
 ### 3.2 Datové typy a omezení
@@ -279,6 +344,32 @@ Zákazník vyplní formulář
 | createdAt | TIMESTAMPTZ | NOT NULL | |
 | updatedAt | TIMESTAMPTZ | NOT NULL | |
 
+#### Tabulka `Service`
+
+| Sloupec | Typ | Omezení | Poznámka |
+|---------|-----|---------|---------|
+| id | UUID | PK, NOT NULL | |
+| name | VARCHAR | NOT NULL, min 2 znaky | Název služby |
+| description | TEXT | nullable | |
+| icon | VARCHAR | NOT NULL, DEFAULT '✂' | Emoji nebo text |
+| basePrice | INTEGER | NOT NULL, DEFAULT 0, min 0 | Orientační cena v Kč |
+| isActive | BOOLEAN | NOT NULL, DEFAULT true | Skrytá/viditelná zákazníkům |
+| showOnHomepage | BOOLEAN | NOT NULL, DEFAULT false | Max 3 na homepage |
+| typeKey | VARCHAR | nullable | Vazba na ServiceType enum (ALTERATION/CUSTOM_SEWING/EXPRESS) |
+| createdAt | TIMESTAMPTZ | NOT NULL | |
+| updatedAt | TIMESTAMPTZ | NOT NULL | |
+
+#### Tabulka `Review`
+
+| Sloupec | Typ | Omezení | Poznámka |
+|---------|-----|---------|---------|
+| id | UUID | PK, NOT NULL | |
+| orderId | UUID | FK→Order, UNIQUE, NOT NULL | Každá objednávka max 1 recenze |
+| tailorProfileId | UUID | FK→TailorProfile, NOT NULL | |
+| customerId | UUID | FK→User (info), NOT NULL | |
+| rating | INTEGER | NOT NULL, CHECK 1–5 | Hvězdičkové hodnocení |
+| createdAt | TIMESTAMPTZ | NOT NULL | |
+
 ### 3.3 Databázové indexy
 
 ```sql
@@ -300,9 +391,10 @@ CREATE UNIQUE INDEX idx_user_email ON "User"("email");
 
 | Akce | Efekt |
 |------|-------|
-| DELETE User (TAILOR) | CASCADE → smaže TailorProfile |
+| DELETE User (TAILOR) | CASCADE → smaže TailorProfile; tím SET NULL → Order.tailorId = NULL |
 | DELETE TailorProfile | SET NULL → Order.tailorId = NULL |
 | DELETE User (CUSTOMER) | RESTRICT — musí se nejdříve vyřešit objednávky |
+| DELETE Order | CASCADE → smaže Review (přes FK orderId) |
 
 ### 3.5 Enumerace (Prisma Enums)
 
@@ -353,6 +445,20 @@ enum OrderStatus {
 | GET | `/api/orders/:id` | Ano | Vlastník/Admin | Detail objednávky |
 | PUT | `/api/orders/:id` | Ano | TAILOR/ADMIN | Aktualizace stavu/ceny |
 | DELETE | `/api/orders/:id` | Ano | CUSTOMER/ADMIN | Zrušení objednávky |
+| POST | `/api/orders/:id/review` | Ano | CUSTOMER | Hodnocení krejčího (1–5) |
+| GET | `/api/tailors` | Ano | Přihlášený | Seznam krejčích (dle ratingu) |
+| POST | `/api/tailors` | Ano | ADMIN | Vytvoření krejčího |
+| GET | `/api/tailors/:id` | Ano | Přihlášený | Detail krejčího |
+| PUT | `/api/tailors/:id` | Ano | ADMIN | Úprava profilu krejčího |
+| DELETE | `/api/tailors/:id` | Ano | ADMIN | Smazání krejčího |
+| GET | `/api/tailors/top` | Ne | — | Top 3 krejčí dle hodnocení (veřejný) |
+| GET | `/api/services` | Ne | — | Seznam katalogových služeb (veřejný) |
+| POST | `/api/services` | Ano | ADMIN | Vytvoření katalogové služby |
+| PUT | `/api/services/:id` | Ano | ADMIN | Úprava katalogové služby |
+| DELETE | `/api/services/:id` | Ano | ADMIN | Smazání katalogové služby |
+| POST | `/api/upload` | Ano | ADMIN | Upload obrázku (multipart/form-data) |
+| GET | `/api/docs` | Ne | — | Swagger UI (interaktivní dokumentace) |
+| GET | `/api/docs/openapi` | Ne | — | OpenAPI JSON specifikace |
 
 ### 4.3 Specifikace endpointů
 
@@ -503,6 +609,123 @@ enum OrderStatus {
 
 ---
 
+#### POST `/api/orders/:id/review`
+
+**Popis:** Zákazník ohodnotí krejčího po dokončení zakázky
+
+**Request Body:**
+```json
+{ "rating": 5 }
+```
+
+**Validace:**
+- `rating`: celé číslo 1–5
+- Objednávka musí mít status `COMPLETED`
+- Volající musí být vlastník objednávky (CUSTOMER)
+- Pro tuto objednávku nesmí existovat jiná recenze
+
+**Response 201:**
+```json
+{
+  "data": {
+    "id": "uuid",
+    "orderId": "uuid",
+    "tailorProfileId": "uuid",
+    "customerId": "uuid",
+    "rating": 5,
+    "createdAt": "2026-05-09T12:00:00.000Z"
+  }
+}
+```
+
+**Response 409:** `{ "error": "Tuto objednávku jste již hodnotili." }`  
+**Response 400:** `{ "error": "Hodnotit lze pouze dokončené objednávky." }`
+
+---
+
+#### GET `/api/tailors/top`
+
+**Popis:** Vrátí top 3 dostupné krejčí seřazené dle průměrného hodnocení z recenzí. Veřejný endpoint bez autentizace.
+
+**Response 200:**
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "name": "Jan Novák",
+      "locality": "Praha",
+      "rating": 4.8,
+      "reviewCount": 12
+    }
+  ]
+}
+```
+
+---
+
+#### GET `/api/services`
+
+**Popis:** Vrátí seznam všech katalogových služeb. Veřejný endpoint bez autentizace.
+
+**Response 200:**
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "name": "Úprava oděvu",
+      "description": "Zkrácení, rozšíření, oprava",
+      "icon": "✂",
+      "basePrice": 200,
+      "isActive": true,
+      "showOnHomepage": true,
+      "typeKey": "ALTERATION"
+    }
+  ]
+}
+```
+
+---
+
+#### POST `/api/services`
+
+**Popis:** Administrátor vytvoří novou katalogovou službu
+
+**Request Body:**
+```json
+{
+  "name": "Expresní oprava",
+  "description": "Rychlá oprava do 24 hodin",
+  "icon": "⚡",
+  "basePrice": 500,
+  "isActive": true,
+  "showOnHomepage": false,
+  "typeKey": "EXPRESS"
+}
+```
+
+**Response 422:** Pokud by přidání překročilo limit 3 služeb na homepage.
+
+---
+
+#### POST `/api/upload`
+
+**Popis:** Administrátor nahraje obrázek na server
+
+**Request:** `multipart/form-data` s polem `file`
+
+**Omezení:**
+- Povolené formáty: JPEG, PNG, WebP, GIF
+- Max. velikost: 5 MB
+
+**Response 201:**
+```json
+{ "url": "/uploads/img_1716296400000_abc123.jpg" }
+```
+
+---
+
 ### 4.4 Chybové kódy
 
 | HTTP kód | Situace |
@@ -513,7 +736,8 @@ enum OrderStatus {
 | 401 | Nepřihlášen |
 | 403 | Přihlášen, ale nemá oprávnění |
 | 404 | Záznam nenalezen |
-| 409 | Konflikt (duplicitní e-mail) |
+| 409 | Konflikt (duplicitní e-mail, duplicitní recenze) |
+| 422 | Přestoupení business pravidla (např. 4. služba na homepage) |
 | 500 | Serverová chyba |
 
 ---
@@ -554,6 +778,29 @@ RootLayout (layout.tsx)
 ```
 
 ### 5.2 Klíčové komponenty
+
+#### `NewOrderClient` (`src/app/orders/new/NewOrderClient.tsx`)
+
+**Typ:** Client Component (`'use client'`)  
+**Důvod:** Interaktivní formulář s lokálním stavem kroků
+
+Multi-step wizard pro vytvoření objednávky. Spravuje stav aktuálního kroku (1–3) a shromažďuje data objednávky. Krok 1 — výběr typu služby a popis; Krok 2 — adresa a termín; Krok 3 — rekapitulace a odeslání.
+
+---
+
+#### `AdminOrderDetail` (`src/app/admin/orders/[id]/AdminOrderDetail.tsx`)
+
+**Typ:** Client Component  
+**Funkce:** Administrátorský formulář pro správu objednávky — nastavení ceny, přiřazení krejčího, přidání interní poznámky, změna stavu.
+
+---
+
+#### `AdminSidebar` (`src/app/admin/AdminSidebar.tsx`)
+
+**Typ:** Client Component  
+**Navigace administrátora:** Dashboard, Objednávky (`/admin/orders`), Krejčí (`/admin/tailors`), Služby (`/admin/services`)
+
+---
 
 #### `Header` (`src/components/layout/Header/Header.tsx`)
 
@@ -842,4 +1089,4 @@ sassOptions: {
 
 ---
 
-*Dokument popisuje aktuální implementovaný stav aplikace. Plánované funkce (platební brána, e-mailové notifikace, hodnocení) budou dokumentovány v příslušných verzích tohoto dokumentu při jejich implementaci.*
+*Dokument popisuje aktuální implementovaný stav aplikace verze 1.0. Plánované funkce (platební brána, e-mailové notifikace, změna termínu objednávky zákazníkem) budou dokumentovány v příslušných verzích tohoto dokumentu při jejich implementaci.*

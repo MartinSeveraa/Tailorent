@@ -64,7 +64,7 @@ export default function TailorItem({ tailor }: Props) {
       </div>
 
       <div className={styles.tailorActions}>
-        <span className={styles.tailorRating}>★ {tailor.rating.toFixed(1)}</span>
+        <span className={styles.tailorRating}>★ {tailor.rating != null ? tailor.rating.toFixed(1) : "—"}</span>
         <Link
           href={`/admin/tailors/${tailor.id}`}
           className={styles.toggleBtnOff}

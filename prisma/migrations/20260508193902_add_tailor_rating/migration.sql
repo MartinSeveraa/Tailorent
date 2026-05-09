@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "tailor_profiles" ADD COLUMN     "rating" DOUBLE PRECISION NOT NULL DEFAULT 0,
+ADD COLUMN     "reviewCount" INTEGER NOT NULL DEFAULT 0;

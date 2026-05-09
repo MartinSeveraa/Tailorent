@@ -18,25 +18,27 @@ type Props = {
 };
 
 const STATUSES = [
-  { value: "PENDING", label: "Čekající" },
-  { value: "CONFIRMED", label: "Potvrzena" },
+  { value: "PENDING",     label: "Čekající" },
+  { value: "CONFIRMED",   label: "Potvrzena" },
   { value: "IN_PROGRESS", label: "Probíhá" },
-  { value: "COMPLETED", label: "Dokončena" },
-  { value: "CANCELLED", label: "Zrušena" },
+  { value: "COMPLETED",   label: "Dokončena" },
+  { value: "CANCELLED",   label: "Zrušena" },
 ];
 
 export default function AdminOrderDetail({ order, tailors }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState(order.status);
+  const [status,  setStatus]  = useState(order.status);
   const [tailorId, setTailorId] = useState(order.tailorId ?? "");
-  const [price, setPrice] = useState(order.price?.toString() ?? "");
-  const [notes, setNotes] = useState(order.notes ?? "");
-  const [saved, setSaved] = useState(false);
+  const [price,   setPrice]   = useState(order.price?.toString() ?? "");
+  const [notes,   setNotes]   = useState(order.notes ?? "");
+  const [saved,   setSaved]   = useState(false);
+  const [error,   setError]   = useState("");
 
   const call = async (data: Record<string, unknown>) => {
     setLoading(true);
     setSaved(false);
+    setError("");
     try {
       const res = await fetch(`/api/orders/${order.id}`, {
         method: "PUT",
@@ -46,7 +48,12 @@ export default function AdminOrderDetail({ order, tailors }: Props) {
       if (res.ok) {
         setSaved(true);
         router.refresh();
+      } else {
+        const body = await res.json().catch(() => ({}));
+        setError(body.error ?? "Chyba při ukládání.");
       }
+    } catch {
+      setError("Chyba připojení.");
     } finally {
       setLoading(false);
     }
@@ -64,11 +71,12 @@ export default function AdminOrderDetail({ order, tailors }: Props) {
 
   const handlePriceSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const payload: Record<string, unknown> = { notes };
     const val = parseFloat(price);
-    const payload: Record<string, unknown> = {};
-    if (!isNaN(val) && val >= 0) payload.price = val;
-    if (notes !== order.notes) payload.notes = notes;
-    if (Object.keys(payload).length > 0) call(payload);
+    if (price !== "" && !isNaN(val) && val >= 0) {
+      payload.price = val;
+    }
+    call(payload);
   };
 
   return (
@@ -76,6 +84,7 @@ export default function AdminOrderDetail({ order, tailors }: Props) {
       <h2 className={styles.cardTitle}>Správa objednávky</h2>
 
       {saved && <div className={styles.success}>Uloženo.</div>}
+      {error && <div className={styles.error}>{error}</div>}
 
       {/* Stav */}
       <div className={styles.section}>
@@ -84,9 +93,7 @@ export default function AdminOrderDetail({ order, tailors }: Props) {
           {STATUSES.map((s) => (
             <button
               key={s.value}
-              className={`${styles.statusBtn} ${
-                status === s.value ? styles.statusBtnActive : ""
-              }`}
+              className={`${styles.statusBtn} ${status === s.value ? styles.statusBtnActive : ""}`}
               onClick={() => handleStatusChange(s.value)}
               disabled={loading || status === s.value}
             >

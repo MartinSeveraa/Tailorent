@@ -95,13 +95,31 @@ Párovací systém
 Profily krejcích
 - Evidence lokality, specializace, dostupnosti a hodnocení
 
+Systém hodnocení a recenzí
+- Zákazník múže ohodnotit krejcího po dokoncení zakázky (stupnice 1–5)
+- Prúmérné hodnocení krejcího se automaticky prrepocítává z recenzí
+- Top krejcí jsou prezentováni na hlavní stránce na základe hodnocení
+- Každou zakázku lze ohodnotit nejvýše jedenkrát
+
+Správa katalogových služeb
+- Administrátor múže pridávat, upravovat, deaktivovat a mazat katalogové služby
+- Každá služba má název, popis, ikonu, základní cenu a vazbu na typ objednávky
+- Administrátor nastavuje, které služby (max 3) jsou zobrazeny na hlavní stránce
+
 Administrátorské funkce
 - Správa krejcích (pridávání, úprava, deaktivace, smazání)
 - Nastavení ceny objednávky
 - Interní poznámky k objednávkám
+- Správa katalogu služeb
+
+API dokumentace
+- Interaktivní Swagger UI na /api/docs
+- OpenAPI specifikace na /api/docs/openapi
+- Upload obrázku administrátorem (max 5 MB, formáty JPEG/PNG/WebP/GIF)
 
 Verejná cást
 - Prezentacní hlavní stránka se službami, cenami a procesem objednávky
+- Sekce top krejcích s prúmérným hodnocením
 
 
 ========================================
@@ -128,6 +146,14 @@ Platforma rozširuje síí krejcích o nového spolupracovníka z Brna. Administ
 
 Zákazník si uvédomí, že si objednal návštévu na špatný den. Prihlásí se, najde objednávku ve stavu Cekající a klikne na Zrušit objednávku. Systém objednávku oznací jako Zrušenou a krejcí ji již neuvidí mezi svými aktivními zakázkami.
 
+5.6 Zákazník hodnotí krejcího
+
+Po dokoncení zakázky zákazník vidí na detailu objednávky možnost ohodnotit krejcího. Vybere hodnocení od 1 do 5 hvézdicek a odešle. Systém vytvorí záznam recenze, prrepocítá prúmérné hodnocení krejcího a zobrazí zákazníkovi potvrzení. Každou zakázku lze ohodnotit pouze jednou — pri pokusu o opakované hodnocení systém vrátí chybu.
+
+5.7 Administrátor spravuje katalog služeb
+
+Administrátor chce aktualizovat nabídku služeb. Prihlásí se a prejde do sekce Admin → Služby. Vidí seznam všech katalogových služeb s informacemi o aktivite a zda jsou zobrazeny na homepage. Klikne na Pridat službu, vyplní název, popis, ikonu, základní cenu a zvolí, zda má být zobrazena na homepage. Systém overí, že na homepage nejsou více než 3 služby — pokud je jich již 3, zobrazí chybu. Službu uloží. Dále múže existující službu upravit nebo deaktivovat, címž ji skryje ze systému, ale nezmaže.
+
 
 ========================================
 6. USER REQUIREMENTS
@@ -152,6 +178,11 @@ UR-09: Krejcí musí vidét adresu, typ služby, termín a popis každé zakázk
 UR-10: Krejcí musí být schopen zmenit stav zakázky na Probíhá a Dokoncená.
 UR-11: Krejcí nesmí vidét zakázky prirrazené jiným krejcím.
 
+Požadavky zákazníka po dokoncení zakázky:
+
+UR-18: Zákazník musí být schopen ohodnotit krejcího po dokoncení zakázky na stupnici 1 až 5.
+UR-19: Každou zakázku lze ohodnotit nejvýše jedenkrát; opakovaný pokus musí být odmítnut.
+
 Požadavky administrátora:
 
 UR-12: Administrátor musí vidét všechny objednávky v systému bez omezení.
@@ -160,6 +191,8 @@ UR-14: Administrátor musí být schopen nastavit cenu libovolné objednávky.
 UR-15: Administrátor musí být schopen rucne prirradit krejcího k objednávce.
 UR-16: Administrátor musí být schopen pridat interní poznámku k objednávce, která nebude viditelná pro zákazníka.
 UR-17: Administrátor musí být schopen zrušit libovolnou objednávku.
+UR-20: Administrátor musí být schopen pridávat, upravovat, deaktivovat a mazat katalogové služby.
+UR-21: Administrátor musí být schopen nastavit, které katalogové služby (maximálne 3) jsou zobrazeny na hlavní stránce.
 
 
 ========================================
@@ -234,11 +267,39 @@ FR-015: Rucní prirrazení krejcího
 
 Administrátor múže rucne prirradit nebo zmenit krejcího u libovolné objednávky ze seznamu dostupných krejcích.
 
-7.5 Verejná cást aplikace
+7.5 Systém hodnocení a recenzí
 
-FR-016: Hlavní stránka
+FR-017: Hodnocení krejcího zákazníkem
 
-Verejná hlavní stránka prezentuje službu a umožnuje prechod k registraci. Obsahuje hero sekci se tremi rotujícími slidery a výzvou k akci, sekci popisující proces objednávky ve trech krocích, prehled služeb s orientacními cenami, statistiky platformy a príbéh zakladatele.
+Zákazník múže ohodnotit krejcího po dokoncení zakázky. Vstupem je celé císlo v rozsahu 1 až 5. Systém overí, že objednávka je ve stavu COMPLETED, že zákazník je vlastníkem objednávky, že objednávka má prirrazeného krejcího a že pro tuto objednávku ješte neexistuje recenze. Výsledkem je uložení záznamu Review a prrepoctení prúmérného hodnocení (rating) a poctu recenzí (reviewCount) na profilu krejcího.
+
+FR-018: Zobrazení top krejcích
+
+Verejný endpoint /api/tailors/top vrátí top 3 dostupné krejcí serazené dle prúmérného hodnocení pocítaného z recenzí. Endpoint nevyžaduje autentizaci a slouží pro prezentaci na hlavní stránce.
+
+7.6 Správa katalogových služeb
+
+FR-019: Správa katalogu služeb administrátorem
+
+Administrátor múže spravovat katalog nabízených služeb. Každá služba obsahuje název (min. 2 znaky), volitelný popis, ikonu (výchozí ✂), základní cenu (min. 0 Kc), príznak aktivity (isActive) a príznak zobrazení na homepage (showOnHomepage). Administrátor múže pridat novou službu, upravit existující, deaktivovat ji (isActive = false, nebude zobrazena zákazníkúm) nebo ji smazat. Na homepage lze zobrazit nejvýše 3 služby — systém odmítne požadavek na zobrazení ctvrtej s HTTP 422.
+
+7.7 API dokumentace
+
+FR-020: Interaktivní dokumentace API
+
+Systém poskytuje interaktivní dokumentaci REST API prostrednictvím Swagger UI na adrese /api/docs. OpenAPI specifikace ve formátu JSON je dostupná na /api/docs/openapi. Dokumentace pokrývá všechny endpointy vcetne autentizacních požadavkú, vstupních schémat a príkladových odpovédí.
+
+7.8 Upload souboru
+
+FR-021: Nahrávání obrázku
+
+Endpoint POST /api/upload umožnuje administrátorovi nahrát obrázek do adresáre public/uploads. Povolené formáty jsou JPEG, PNG, WebP a GIF. Maximální velikost souboru je 5 MB. Endpoint vrátí relativní cestu k nahranému souboru.
+
+7.9 Verejná cást aplikace
+
+FR-022: Hlavní stránka
+
+Verejná hlavní stránka prezentuje službu a umožnuje prechod k registraci. Obsahuje hero sekci se tremi rotujícími slidery a výzvou k akci, sekci popisující proces objednávky ve trech krocích, prehled katalogových služeb nacítaný z databáze, sekci top 3 krejcích dle hodnocení, statistiky platformy a príbéh zakladatele.
 
 
 ========================================
@@ -292,6 +353,23 @@ POST /api/orders - vytvorení nové objednávky, vyžaduje roli CUSTOMER
 GET /api/orders/{id} - detail objednávky, vyžaduje autentizaci a vlastnictví záznamu nebo roli ADMIN
 PUT /api/orders/{id} - aktualizace stavu, ceny nebo poznámky, vyžaduje autentizaci
 DELETE /api/orders/{id} - zrušení objednávky, vyžaduje autentizaci
+POST /api/orders/{id}/review - hodnocení krejcího (1–5), vyžaduje roli CUSTOMER a stav COMPLETED
+
+GET /api/tailors - seznam krejcích se serazením dle hodnocení, vyžaduje autentizaci
+POST /api/tailors - vytvorení nového krejcího, vyžaduje roli ADMIN
+GET /api/tailors/{id} - detail krejcího, vyžaduje autentizaci
+PUT /api/tailors/{id} - úprava profilu krejcího, vyžaduje roli ADMIN
+DELETE /api/tailors/{id} - smazání krejcího, vyžaduje roli ADMIN
+GET /api/tailors/top - top 3 krejcí dle hodnocení, verejný bez autentizace
+
+GET /api/services - seznam katalogových služeb, verejný bez autentizace
+POST /api/services - vytvorení služby, vyžaduje roli ADMIN
+PUT /api/services/{id} - úprava služby, vyžaduje roli ADMIN
+DELETE /api/services/{id} - smazání služby, vyžaduje roli ADMIN
+
+POST /api/upload - nahrání obrázku (multipart/form-data), vyžaduje roli ADMIN
+GET /api/docs - Swagger UI, verejný
+GET /api/docs/openapi - OpenAPI JSON specifikace, verejný
 
 9.3 Hardwarové rozhraní
 
@@ -380,6 +458,10 @@ Knihovna bcryptjs je použita pro hashování a porovnávání hesel. Je instalo
 ESR-005: Prisma ORM
 
 Prisma Client slouží jako vrstva pro prístup k databázi. Generuje se ze schématu príkazem prisma generate a vyžaduje databázové pripojení pri spuštení. Kritickost: bez Prisma ORM systém nemúže pracovat s daty.
+
+ESR-006: Swagger UI (swagger-ui-dist)
+
+Interaktivní dokumentace API je renderována na strane klienta knihovnou swagger-ui-dist. Pokud je CDN nedostupná, stránka /api/docs nebude renderovat dokumentaci, ale ostatní funkcionalita systému zústane nedotcena. 
 
 Produkní závislosti (verze):
 next 16.2.1, react 18.2.0, next-auth 4.24.7, @prisma/client 5.10.0, bcryptjs 2.4.3, zod 3.22.4, sass 1.71.0

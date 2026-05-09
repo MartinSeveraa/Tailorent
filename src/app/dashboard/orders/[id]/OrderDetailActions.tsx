@@ -8,6 +8,7 @@ type Props = {
   orderId: string;
   status: string;
   role: string;
+  existingRating: number | null;
 };
 
 const STATUS_DESC: Record<string, Record<string, string>> = {
@@ -27,10 +28,36 @@ const STATUS_DESC: Record<string, Record<string, string>> = {
   },
 };
 
-export default function OrderDetailActions({ orderId, status, role }: Props) {
+export default function OrderDetailActions({ orderId, status, role, existingRating }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [selectedRating, setSelectedRating] = useState(0);
+  const [reviewSuccess, setReviewSuccess] = useState(false);
+
+  const submitReview = async () => {
+    if (!selectedRating) return;
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/orders/${orderId}/review`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rating: selectedRating }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Něco se pokazilo.");
+        return;
+      }
+      setReviewSuccess(true);
+      router.refresh();
+    } catch {
+      setError("Chyba připojení. Zkuste to znovu.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const callApi = async (method: string, body?: Record<string, string>) => {
     setLoading(true);
@@ -73,6 +100,43 @@ export default function OrderDetailActions({ orderId, status, role }: Props) {
           >
             {loading ? "Ruším..." : "Zrušit objednávku"}
           </button>
+        )}
+
+        {role === "CUSTOMER" && status === "COMPLETED" && (
+          <div className={styles.reviewSection}>
+            <h3 className={styles.reviewTitle}>Hodnocení krejčího</h3>
+            {existingRating !== null || reviewSuccess ? (
+              <p className={styles.reviewDone}>
+                ✓ Vaše hodnocení:{" "}
+                {"★".repeat(existingRating ?? selectedRating)}
+                {"☆".repeat(5 - (existingRating ?? selectedRating))}
+              </p>
+            ) : (
+              <>
+                <p className={styles.reviewHint}>Jak jste spokojeni s prací krejčího?</p>
+                <div className={styles.stars}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      className={`${styles.star} ${selectedRating >= star ? styles.starActive : ""}`}
+                      onClick={() => setSelectedRating(star)}
+                      aria-label={`${star} hvězdiček`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+                <button
+                  className={styles.primaryBtn}
+                  disabled={loading || selectedRating === 0}
+                  onClick={submitReview}
+                >
+                  {loading ? "Odesílám..." : "Odeslat hodnocení"}
+                </button>
+              </>
+            )}
+          </div>
         )}
 
         {role === "TAILOR" && status === "CONFIRMED" && (

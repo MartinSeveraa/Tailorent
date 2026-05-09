@@ -61,6 +61,20 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       },
     });
 
+    const aggregate = await (prisma as any).review.aggregate({
+      where: { tailorProfileId: order.tailorId },
+      _avg: { rating: true },
+      _count: { rating: true },
+    });
+
+    await prisma.tailorProfile.update({
+      where: { id: order.tailorId },
+      data: {
+        rating: aggregate._avg.rating ?? parsed.data.rating,
+        reviewCount: aggregate._count.rating,
+      },
+    });
+
     return NextResponse.json({ data: review }, { status: 201 });
   } catch (error) {
     console.error("[POST /api/orders/:id/review]", error);
