@@ -7,6 +7,7 @@ import Link from "next/link";
 import { formatDate, formatPrice } from "@/lib/utils";
 import { ORDER_STATUS_LABELS, SERVICE_TYPE_LABELS } from "@/types";
 import DashboardSidebar from "./DashboardSidebar";
+import DashboardNotifications from "./DashboardNotifications";
 import styles from "./dashboard.module.scss";
 
 export const metadata = { title: "Dashboard" };
@@ -26,6 +27,12 @@ export default async function DashboardPage({
   if (role === "ADMIN") redirect("/admin/orders");
 
   // ── Data fetch ──────────────────────────────────────────────
+  const notifications = await (prisma as any).notification.findMany({
+    where: { userId: user.id },
+    orderBy: { createdAt: "desc" },
+    take: 20,
+  });
+
   let orders: any[] = [];
 
   if (role === "CUSTOMER") {
@@ -83,6 +90,9 @@ export default async function DashboardPage({
             </Link>
           )}
         </div>
+
+        {/* Notifikace */}
+        <DashboardNotifications initial={notifications} />
 
         {/* Stats */}
         <div className={styles.statsGrid}>

@@ -5,6 +5,8 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createOrderSchema } from "@/lib/validations";
 import { findMatchingTailor } from "@/lib/matching";
+import { createNotification } from "@/lib/notifications";
+import { SERVICE_TYPE_LABELS } from "@/types";
 
 export async function GET(req: NextRequest) {
   try {
@@ -58,19 +60,32 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const scheduledAt = new Date(parsed.data.scheduledAt);
+
     const tailorId = await findMatchingTailor(
       parsed.data.city,
-      parsed.data.serviceType
+      parsed.data.serviceType,
+      scheduledAt
     );
 
     const order = await prisma.order.create({
       data: {
         ...parsed.data,
-        scheduledAt: new Date(parsed.data.scheduledAt),
+        scheduledAt,
         customerId: user.id,
         ...(tailorId && { tailorId, status: "CONFIRMED" }),
       },
+      include: { tailor: { include: { user: true } } },
     });
+
+    if (tailorId && order.tailor) {
+      const serviceLabel = SERVICE_TYPE_LABELS[parsed.data.serviceType as keyof typeof SERVICE_TYPE_LABELS];
+      await createNotification(
+        order.tailor.user.id,
+        `Byla vám přiřazena nová zakázka: ${serviceLabel} — ${parsed.data.city}`,
+        `/dashboard/orders/${order.id}`
+      );
+    }
 
     return NextResponse.json({ data: order }, { status: 201 });
   } catch (error) {

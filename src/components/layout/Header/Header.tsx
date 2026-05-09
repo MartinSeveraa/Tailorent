@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import styles from "./Header.module.scss";
+import { NotificationBell } from "./NotificationBell";
 
 const NAV_LINKS = [
   { href: "#jak-pracujeme", label: "Jak pracujeme" },
@@ -44,11 +45,18 @@ export function Header() {
               <Link href="/register" className={styles.cta}>Objednat</Link>
             </>
           ) : role === "ADMIN" ? (
-            <Link href="/admin/orders" className={styles.cta}>Admin panel</Link>
+            <>
+              <NotificationBell />
+              <Link href="/admin/orders" className={styles.cta}>Admin panel</Link>
+            </>
           ) : role === "TAILOR" ? (
-            <Link href="/dashboard" className={styles.login}>Dashboard</Link>
+            <>
+              <NotificationBell />
+              <Link href="/dashboard" className={styles.login}>Dashboard</Link>
+            </>
           ) : (
             <>
+              <NotificationBell />
               <Link href="/dashboard" className={styles.login}>Moje objednávky</Link>
               <Link href="/orders/new" className={styles.cta}>Objednat</Link>
             </>

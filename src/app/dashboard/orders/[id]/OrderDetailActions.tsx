@@ -9,6 +9,8 @@ type Props = {
   status: string;
   role: string;
   existingRating: number | null;
+  price: number | null;
+  priceAccepted: boolean | null;
 };
 
 const STATUS_DESC: Record<string, Record<string, string>> = {
@@ -28,7 +30,7 @@ const STATUS_DESC: Record<string, Record<string, string>> = {
   },
 };
 
-export default function OrderDetailActions({ orderId, status, role, existingRating }: Props) {
+export default function OrderDetailActions({ orderId, status, role, existingRating, price, priceAccepted }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -59,7 +61,7 @@ export default function OrderDetailActions({ orderId, status, role, existingRati
     }
   };
 
-  const callApi = async (method: string, body?: Record<string, string>) => {
+  const callApi = async (method: string, body?: Record<string, unknown>) => {
     setLoading(true);
     setError("");
     try {
@@ -100,6 +102,36 @@ export default function OrderDetailActions({ orderId, status, role, existingRati
           >
             {loading ? "Ruším..." : "Zrušit objednávku"}
           </button>
+        )}
+
+        {role === "CUSTOMER" && price !== null && priceAccepted === null && status !== "CANCELLED" && (
+          <div className={styles.priceSection}>
+            <p className={styles.priceLabel}>Stanovená cena</p>
+            <p className={styles.priceValue}>{price.toLocaleString("cs-CZ")} Kč</p>
+            <p className={styles.reviewHint}>Přijmete tuto cenu?</p>
+            <div className={styles.priceActions}>
+              <button
+                className={styles.successBtn}
+                disabled={loading}
+                onClick={() => callApi("PUT", { priceAccepted: true })}
+              >
+                {loading ? "..." : "Přijmout cenu"}
+              </button>
+              <button
+                className={styles.dangerBtn}
+                disabled={loading}
+                onClick={() => callApi("PUT", { priceAccepted: false })}
+              >
+                {loading ? "..." : "Odmítnout a zrušit"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {role === "CUSTOMER" && price !== null && priceAccepted === true && (
+          <p className={styles.actionDesc}>
+            ✓ Cenu {price.toLocaleString("cs-CZ")} Kč jste přijali.
+          </p>
         )}
 
         {role === "CUSTOMER" && status === "COMPLETED" && (

@@ -530,6 +530,110 @@ $gold-lt: #e0c278;
   color: $gold;
 }
 
+// ── NOTIFICATIONS ──
+.notifSection {
+  margin-bottom: 36px;
+}
+
+.notifHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 2px;
+}
+
+.notifTitle {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.notifBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  background: $gold;
+  color: $dark;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0 5px;
+  font-family: var(--font-body);
+}
+
+.notifMarkBtn {
+  background: none;
+  border: none;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.35);
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: color 200ms;
+
+  &:hover { color: rgba(255,255,255,0.7); }
+}
+
+.notifList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.notifItem {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  background: $dark-3;
+  border-left: 3px solid transparent;
+  transition: background 150ms;
+}
+
+.notifUnread {
+  border-left-color: $gold;
+  background: rgba(201,168,76,0.04);
+}
+
+.notifRead {
+  border-left-color: transparent;
+}
+
+.notifMessage {
+  font-size: 0.84rem;
+  color: rgba(255,255,255,0.75);
+  line-height: 1.5;
+  text-decoration: none;
+  flex: 1;
+  transition: color 150ms;
+
+  &:is(a):hover { color: #fff; }
+}
+
+.notifUnread .notifMessage {
+  color: #fff;
+}
+
+.notifTime {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.25);
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
 // ── STATUS BADGE ──
 .statusBadge {
   display: inline-block;

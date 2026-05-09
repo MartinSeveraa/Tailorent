@@ -30,6 +30,7 @@ export const updateOrderSchema = z.object({
   tailorId: z.string().uuid().nullable().optional(),
   price: z.number().min(0).optional(),
   notes: z.string().optional(),
+  priceAccepted: z.boolean().optional(),
 });
 
 export const createTailorSchema = z.object({

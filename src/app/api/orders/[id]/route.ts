@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { updateOrderSchema } from "@/lib/validations";
+import { createNotification } from "@/lib/notifications";
 
 const ORDER_INCLUDE = {
   customer: { select: { id: true, name: true, email: true } },
@@ -78,14 +79,14 @@ export async function PUT(
       );
     }
 
-    const { status, tailorId, price, notes } = parsed.data;
+    const { status, tailorId, price, notes, priceAccepted } = parsed.data;
 
     // Krejčí: pouze stav vlastní zakázky
     if (user.role === "TAILOR") {
       if (order.tailor?.userId !== user.id) {
         return NextResponse.json({ error: "Přístup zamítnut" }, { status: 403 });
       }
-      if (tailorId !== undefined || price !== undefined || notes !== undefined) {
+      if (tailorId !== undefined || price !== undefined || notes !== undefined || priceAccepted !== undefined) {
         return NextResponse.json({ error: "Přístup zamítnut" }, { status: 403 });
       }
       if (status) {
@@ -102,18 +103,49 @@ export async function PUT(
       }
     }
 
-    // Zákazník: pouze stornování vlastní objednávky
+    // Zákazník: storno nebo přijetí/odmítnutí ceny
     if (user.role === "CUSTOMER") {
       if (order.customerId !== user.id) {
         return NextResponse.json({ error: "Přístup zamítnut" }, { status: 403 });
       }
-      if (status !== "CANCELLED") {
-        return NextResponse.json({ error: "Přístup zamítnut" }, { status: 403 });
+      if (priceAccepted !== undefined) {
+        if (order.price === null) {
+          return NextResponse.json({ error: "Cena ještě nebyla stanovena." }, { status: 400 });
+        }
+        if ((order as any).priceAccepted !== null) {
+          return NextResponse.json({ error: "Cenu jste již vyjádřili." }, { status: 400 });
+        }
+      } else {
+        if (status !== "CANCELLED") {
+          return NextResponse.json({ error: "Přístup zamítnut" }, { status: 403 });
+        }
+        if (!["PENDING", "CONFIRMED"].includes(order.status)) {
+          return NextResponse.json(
+            { error: "Objednávku v tomto stavu nelze zrušit" },
+            { status: 400 }
+          );
+        }
       }
-      if (!["PENDING", "CONFIRMED"].includes(order.status)) {
+    }
+
+    // Kontrola double-bookingu při ručním přiřazení krejčího adminem
+    if (user.role === "ADMIN" && tailorId) {
+      const window = 2 * 60 * 60 * 1000;
+      const conflict = await prisma.order.findFirst({
+        where: {
+          tailorId,
+          id: { not: id },
+          status: { in: ["CONFIRMED", "IN_PROGRESS"] },
+          scheduledAt: {
+            gte: new Date(order.scheduledAt.getTime() - window),
+            lte: new Date(order.scheduledAt.getTime() + window),
+          },
+        },
+      });
+      if (conflict) {
         return NextResponse.json(
-          { error: "Objednávku v tomto stavu nelze zrušit" },
-          { status: 400 }
+          { error: "Krejčí má v tomto čase jinou zakázku (±2 hodiny). Vyberte jiného krejčího nebo jiný termín." },
+          { status: 409 }
         );
       }
     }
@@ -122,18 +154,70 @@ export async function PUT(
     if (status !== undefined) updateData.status = status;
     if (tailorId !== undefined) {
       updateData.tailorId = tailorId ?? null;
-      if (tailorId && order.status === "PENDING") {
-        updateData.status = "CONFIRMED";
-      }
+      if (tailorId && order.status === "PENDING") updateData.status = "CONFIRMED";
     }
     if (price !== undefined) updateData.price = price;
     if (notes !== undefined) updateData.notes = notes;
+    if (priceAccepted !== undefined) {
+      updateData.priceAccepted = priceAccepted;
+      if (!priceAccepted) updateData.status = "CANCELLED";
+    }
 
     const updated = await prisma.order.update({
       where: { id },
       data: updateData,
       include: ORDER_INCLUDE,
     });
+
+    // ── Notifikace ───────────────────────────────────────────────
+    const orderLink = `/dashboard/orders/${id}`;
+
+    // Admin nastavil cenu → notifikace zákazníkovi
+    if (price !== undefined) {
+      await createNotification(
+        order.customerId,
+        `Byla stanovena cena vaší objednávky: ${Number(price).toLocaleString("cs-CZ")} Kč. Potvrďte prosím přijetí.`,
+        orderLink
+      );
+    }
+
+    // Admin přiřadil krejčího → notifikace zákazníkovi + krejčímu
+    if (tailorId && tailorId !== order.tailorId) {
+      const newTailor = await prisma.tailorProfile.findUnique({
+        where: { id: tailorId },
+        include: { user: true },
+      });
+      if (newTailor) {
+        await createNotification(
+          order.customerId,
+          `Byl vám přiřazen krejčí: ${newTailor.user.name}`,
+          orderLink
+        );
+        await createNotification(
+          newTailor.user.id,
+          `Byla vám přiřazena nová zakázka — ${order.city}`,
+          `/dashboard/orders/${id}`
+        );
+      }
+    }
+
+    // Krejčí označil zakázku jako dokončenou → notifikace zákazníkovi
+    if (status === "COMPLETED") {
+      await createNotification(
+        order.customerId,
+        "Vaše zakázka byla dokončena. Ohodnoťte krejčího!",
+        orderLink
+      );
+    }
+
+    // Zákazník odmítl cenu → notifikace krejčímu (pokud je přiřazen)
+    if (priceAccepted === false && order.tailor) {
+      await createNotification(
+        order.tailor.userId,
+        "Zákazník odmítl stanovenou cenu — zakázka byla zrušena.",
+        undefined
+      );
+    }
 
     return NextResponse.json({ data: updated });
   } catch (error) {

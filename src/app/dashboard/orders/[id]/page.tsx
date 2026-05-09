@@ -123,6 +123,8 @@ export default async function OrderDetailPage({
             status={order.status}
             role={role}
             existingRating={order.review?.rating ?? null}
+            price={order.price ? Number(order.price) : null}
+            priceAccepted={(order as any).priceAccepted ?? null}
           />
         </div>
       </main>

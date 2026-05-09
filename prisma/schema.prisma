@@ -47,8 +47,9 @@ model User {
   updatedAt    DateTime      @updatedAt
 
   // Relations
-  orders       Order[]       @relation("CustomerOrders")
+  orders        Order[]        @relation("CustomerOrders")
   tailorProfile TailorProfile?
+  notifications Notification[]
 
   @@map("users")
 }
@@ -97,9 +98,10 @@ model Order {
   address     String
   city        String
   scheduledAt DateTime
-  status      OrderStatus @default(PENDING)
-  price       Decimal?    @db.Decimal(10, 2)
-  notes       String?     // Interní poznámky krejčího / admina
+  status        OrderStatus @default(PENDING)
+  price         Decimal?    @db.Decimal(10, 2)
+  priceAccepted Boolean?    // null=čeká, true=přijato, false=odmítnuto zákazníkem
+  notes         String?     // Interní poznámky krejčího / admina
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
@@ -109,6 +111,19 @@ model Order {
   review   Review?
 
   @@map("orders")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  message   String
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
 }
 
 model Review {
