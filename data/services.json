@@ -25,14 +25,5 @@
     "priceFrom": 500,
     "imageUrl": "https://images.unsplash.com/photo-1593032465171-8bd9f0f2a58a?w=900&q=80&fit=crop",
     "isActive": true
-  },
-  {
-    "id": "service_1775582198605",
-    "serviceType": "CUSTOM_SEWING",
-    "title": "Ušiju ti prdel",
-    "description": "Dvakrát",
-    "priceFrom": 6000,
-    "imageUrl": "/uploads/img_1775582168085_x6mh5n.png",
-    "isActive": true
   }
 ]
