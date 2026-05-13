@@ -26,13 +26,13 @@ Platforma pro objednávání krejčovských služeb s návštěvou u zákazníka
 ### Požadavky
 
 - Node.js 18+
-- pnpm
+- npm
 - PostgreSQL
 
 ### Instalace závislostí
 
 ```bash
-pnpm install
+npm install
 ```
 
 ### Konfigurace prostředí
@@ -53,48 +53,37 @@ Vyplň hodnoty v `.env.local`:
 
 ```bash
 # Vytvoření schématu
-pnpm prisma migrate dev --name init
+npx prisma migrate dev --name init
 
 # Seed demo dat (uživatelé, objednávky, služby)
-pnpm prisma db seed
+npm run prisma:seed
 ```
 
 ### Spuštění
 
 ```bash
 # Development
-pnpm dev
+npm run dev
 
 # Production build
-pnpm build
-pnpm start
+npm run build
+npm start
 ```
 
 Aplikace běží na [http://localhost:3000](http://localhost:3000).
 
----
-
-## Demo účty (po seedu)
-
-| Role | E-mail | Heslo |
-|---|---|---|
-| Admin | `admin@tailorent.cz` | `admin123` |
-| Krejčí | `jana.novakova@tailorent.cz` | `krejci123` |
-| Zákazník | `petr.svoboda@example.cz` | `zakaznik123` |
-
----
 
 ## Užitečné příkazy
 
 ```bash
 # Prisma Studio — GUI pro databázi
-pnpm prisma studio
+npm run prisma:studio
 
 # Generování Prisma klienta po změně schématu
-pnpm prisma generate
+npm run prisma:generate
 
 # Linting
-pnpm lint
+npm run lint
 ```
 
 ---
